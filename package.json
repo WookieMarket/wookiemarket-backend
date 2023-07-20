@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "cross-env DEBUG=nodeapp:* PORT=3001 nodemon ./bin/www"
+    "dev": "cross-env DEBUG=nodeapp:* PORT=3001 nodemon ./bin/www",
+    "initDB": "node ./bin/initDB"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

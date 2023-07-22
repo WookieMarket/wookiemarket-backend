@@ -1,4 +1,4 @@
 module.exports = {
-  //Ad: require("./Ad"),
-  User: require("./User"),
+    Advert: require('./Advert'),
+    User: require('./User'),
 };

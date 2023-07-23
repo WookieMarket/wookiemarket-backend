@@ -1,15 +1,10 @@
 'use strict';
 require('dotenv').config();
-const fs = require('fs');
+
 const { Advert, User } = require('../models');
 const connection = require('../lib/connectMongoose');
 const users = require('./users');
-const path = require('path');
-const advertData = fs.readFileSync(
-    //path.join(__dirname, './adverts.js')
-    path.join(__dirname, './adverts_json.json')
-);
-const init = JSON.parse(advertData);
+const advertData = require('./adverts');
 
 main().catch((err) => console.log('There was a error', err));
 
@@ -54,7 +49,7 @@ async function initAdverts() {
     console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
     // Create initial advertisements
-    //const inserted = await Advert.insertMany(advertData);
-    const inserted = await Advert.insertMany(init);
+    const inserted = await Advert.insertMany(advertData);
+
     console.log(`Created ${inserted.length} adverts.`);
 }

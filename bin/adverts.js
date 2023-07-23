@@ -3,7 +3,7 @@ const adverts = [
         name: 'Deadth Star III',
         onSale: true,
         price: 850000000000000000,
-        image: Death_Star_III.webp,
+        image: 'Death_Star_III.webp',
         category: 'Empire',
         description:
             'Tercera Estrella de la muerte. Construída en secreto y en perfecto estado (aún no ha sido atacada). Longitud: 900 km. Envergadura: 900 km, altura: 900 Km. Armamento: Reflector parabólico de superrayo láser (1), Baterías turboláser (15.000), Baterías pesadas de turboláseres (15,000), Cañones (7.500), Cañones de iones (5.000), Rayo tractor generadores (768), >1200000 salas, 100000 hangares y mucho más. Sin amueblar, sin tropas ni personal. Sin vehículos ni naves. Se vende por cambio a una más grande. Regalo un ambientador de pino para el retrovisor',

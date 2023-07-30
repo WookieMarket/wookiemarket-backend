@@ -5,7 +5,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
 const LoginControllerApi = require("./controllers/loginControllerApi");
-const jwtAuthApiMiddlewar = require("./lib/jwtAuthApiMiddleware");
+//const jwtAuthApiMiddlewar = require("./lib/jwtAuthApiMiddleware");
 const MongoStore = require("connect-mongo");
 
 require("./lib/connectMongoose");
@@ -16,10 +16,10 @@ var usersRouter = require("./routes/users");
 var app = express();
 const cors = require("cors");
 
-// Configurar opciones CORS para permitir solicitudes desde localhost:3000
+//NOTE Configure CORS options to allow requests from localhost:3000
 const corsOptions = {
   origin: "http://localhost:3000",
-  optionsSuccessStatus: 200, // Algunos navegadores antiguos (IE11, varios SmartTVs) interpretarán 204 como 'sin contenido'
+  optionsSuccessStatus: 200, // Some older browsers (IE11, various SmartTVs) will interpret 204 as 'no content'
 };
 
 // view engine setup
@@ -79,9 +79,9 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-const port = 3001;
-app.listen(port, () => {
-  console.log(`Servidor backend funcionando en http://localhost:${port}`);
-});
+// const port = 3001;
+// app.listen(port, () => {
+//   console.log(`Servidor backend funcionando en http://localhost:${port}`);
+// });
 
 module.exports = app;

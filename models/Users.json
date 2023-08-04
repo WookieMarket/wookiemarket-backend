@@ -2,11 +2,18 @@
     {
         "email": "user@example.com",
         "password": "1234",
-        "username": "mando"
+        "username": "mando",
+        "resetpassword": ""
     },
     {
         "email": "pepito@server.com",
         "password": "superseguro",
         "username": "pepito"
+    },
+    {
+        "email": "fumanchu6999@gmail.com",
+        "password": "1234",
+        "username": "mandolor",
+        "resetpassword": ""
     }
 ]

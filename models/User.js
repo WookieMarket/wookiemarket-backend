@@ -27,6 +27,12 @@ userSchema.methods.comparePassword = function (rawPassword) {
   return bcrypt.compare(rawPassword, this.password);
 };
 
+// Definir el método estático para buscar usuarios por su correo electrónico
+userSchema.statics.findByEmail = function (email) {
+  const query = User.findOne({ email: email });
+  return query;
+};
+
 //NOTE create model
 
 const User = mongoose.model("User", userSchema);

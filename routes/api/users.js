@@ -13,4 +13,15 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/email/:email", async (req, res, next) => {
+  try {
+    let email = req.params.email;
+    emailUser = await User.findByEmail(email);
+
+    res.json({ results: emailUser });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

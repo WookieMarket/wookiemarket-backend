@@ -45,9 +45,9 @@ router.get("/email/:email", async (req, res, next) => {
 //   }
 // });
 
-// Ruta para solicitar recuperación de contraseña
-router.post("/recover-password", async (req, res) => {
-  const { to } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
+// Ruta para enviar un correo de recuperacion de contraseña
+router.post("/email-password", async (req, res) => {
+  const { to, newPassword } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
 
   try {
     await User.microEmailService(to);
@@ -59,6 +59,24 @@ router.post("/recover-password", async (req, res) => {
     console.error(error);
     res.status(500).json({
       error: "Error al enviar el correo de recuperación de contraseña.",
+    });
+  }
+});
+
+// Ruta para solicitar recuperación de contraseña
+router.post("/recover-password", async (req, res) => {
+  const { email, token, newPassword } = req.body; // Suponiendo que el email y newPassword se envían en el cuerpo de la solicitud
+
+  try {
+    await User.resetPassword(email, token, newPassword);
+
+    res.status(200).json({
+      message: "Contraseña cambiada correctamente",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Error al cambiar la contraseña.",
     });
   }
 });

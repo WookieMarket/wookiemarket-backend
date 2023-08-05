@@ -53,6 +53,7 @@ app.use(
 app.use("/api/users", require("./routes/api/users"));
 app.use("/api/users/email", require("./routes/api/users"));
 app.post("/api/users/recover-password", require("./routes/api/users"));
+app.post("/api/users/email-password", require("./routes/api/users"));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

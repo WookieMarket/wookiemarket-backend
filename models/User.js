@@ -33,12 +33,13 @@ userSchema.methods.comparePassword = function (rawPassword) {
   return bcrypt.compare(rawPassword, this.password);
 };
 
-//NOTE Define the static method to search for users by their email
+//DONE Define the static method to search for users by their email
 userSchema.statics.findByEmail = function (email) {
   const query = User.findOne({ email: email });
   return query;
 };
 
+//DONE method that sends an email that contains the user's own email and a token to change the password
 userSchema.statics.microEmailService = async function (to) {
   try {
     const user = await this.findOne({ email: to });
@@ -47,10 +48,10 @@ userSchema.statics.microEmailService = async function (to) {
       throw new Error("Usuario no encontrado");
     }
 
-    // Borramos el campo resetpassword antes de almacenar el nuevo valor
+    //NOTE We clear the resetpassword field before storing the new value
     user.resetpassword = "";
 
-    // Aquí generas el token de recuperación de contraseña
+    //NOTE Here you generate the password recovery token
     const token = jwt.sign(
       { resetpassword: user.resetpassword },
       process.env.JWT_SECRET,
@@ -59,12 +60,11 @@ userSchema.statics.microEmailService = async function (to) {
       },
     );
 
+    //NOTE I delete the old token before re-saving the new one
     user.resetpassword = token;
     await user.save();
 
-    console.log("token", token);
-
-    // Enviar el mensaje al microservicio para enviar el correo electrónico
+    //NOTE Send the message to the microservice to send the email
     const emailRequest = {
       type: "send_email",
       to: to,
@@ -75,11 +75,38 @@ userSchema.statics.microEmailService = async function (to) {
         token: token,
       },
     };
-    console.log("email", emailRequest);
 
     return new Promise(resolve => requester.send(emailRequest, resolve));
   } catch (error) {
     throw new Error("Error al enviar el correo de recuperación de contraseña.");
+  }
+};
+
+// Método estático para resetear la contraseña
+userSchema.statics.resetPassword = async function (email, token, newPassword) {
+  try {
+    // Buscar al usuario en la base de datos por su email
+    const user = await this.findOne({ email: email, resetpassword: token });
+
+    // Si no se encuentra al usuario o el token no coincide, retornar un error
+    if (!user) {
+      throw new Error("Token de recuperación inválido o usuario no encontrado");
+    }
+
+    // Encriptar la nueva contraseña utilizando la función hashPassword
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    // Actualizar la contraseña del usuario con la nueva contraseña encriptada
+    user.password = hashedPassword;
+    user.resetpassword = ""; // Borrar el token de recuperación una vez que se ha utilizado
+
+    await user.save();
+
+    // Responder con un mensaje de éxito
+    return { message: "Contraseña modificada con éxito" };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al cambiar la contraseña.");
   }
 };
 

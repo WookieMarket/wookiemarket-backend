@@ -11,9 +11,14 @@
         "username": "pepito"
     },
     {
+        "_id": {
+          "$oid": "64cff3ef78e623b42d8a987b"
+        },
         "email": "fumanchu6999@gmail.com",
-        "password": "1234",
-        "username": "mandolor",
-        "resetpassword": ""
-    }
+        "username": "mando2",
+        "password": "$2b$07$qz35IkHpftxtigdinVcYA.kqdmWJUGDoEbSws9nh43IxTZlyiLQQu",
+        "resetpassword": "",
+        "__v": 0
+      }
+   
 ]

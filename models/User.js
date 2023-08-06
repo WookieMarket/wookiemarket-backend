@@ -39,10 +39,16 @@ userSchema.statics.findByEmail = function (email) {
   return query;
 };
 
+// Definir el método estático para buscar un usuario por su ID
+userSchema.statics.findUserById = function (userId) {
+  // Utilizar el método 'findById' de Mongoose para buscar un usuario por su ID
+  return User.findById(userId);
+};
+
 //DONE method that sends an email that contains the user's own email and a token to change the password
 userSchema.statics.microEmailService = async function (to) {
   try {
-    const user = await this.findOne({ email: to });
+    const user = await User.findOne({ email: to });
 
     if (!user) {
       throw new Error("Usuario no encontrado");
@@ -52,13 +58,9 @@ userSchema.statics.microEmailService = async function (to) {
     user.resetpassword = "";
 
     //NOTE Here you generate the password recovery token
-    const token = jwt.sign(
-      { resetpassword: user.resetpassword },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      },
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     //NOTE I delete the old token before re-saving the new one
     user.resetpassword = token;

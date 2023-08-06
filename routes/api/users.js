@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { User } = require("../../models");
-const bcrypt = require("bcrypt");
+//const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const cote = require("cote");
-const sgMail = require("@sendgrid/mail");
+//const cote = require("cote");
+//const sgMail = require("@sendgrid/mail");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -47,7 +47,7 @@ router.get("/email/:email", async (req, res, next) => {
 
 // Ruta para enviar un correo de recuperacion de contraseña
 router.post("/email-password", async (req, res) => {
-  const { to, newPassword } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
+  const { to } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
 
   try {
     await User.microEmailService(to);
@@ -64,18 +64,39 @@ router.post("/email-password", async (req, res) => {
 });
 
 // Ruta para solicitar recuperación de contraseña
+
 router.post("/recover-password", async (req, res) => {
-  const { email, token, newPassword } = req.body; // Suponiendo que el email y newPassword se envían en el cuerpo de la solicitud
+  const { email, token, newPassword } = req.body;
 
   try {
-    await User.resetPassword(email, token, newPassword);
+    // Verificar si el token de la URL es válido y decodificarlo
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    res.status(200).json({
-      message: "Contraseña cambiada correctamente",
-    });
+    // Obtener el ID del usuario desde el token decodificado
+    const userId = decodedToken.userId;
+
+    console.log("token decodi", decodedToken);
+
+    // Obtener el usuario desde la base de datos utilizando el ID del usuario
+    const user = await User.findUserById(userId);
+    console.log("usuario", user);
+
+    // Verificar si el token almacenado en la base de datos coincide con el token de la URL
+    if (user && user.resetpassword === token) {
+      // Si el token coincide, proceder a cambiar la contraseña
+      await User.resetPassword(email, token, newPassword);
+
+      return res.status(200).json({
+        message: "Contraseña cambiada correctamente",
+      });
+    } else {
+      return res.status(400).json({
+        error: "Token inválido o expirado.",
+      });
+    }
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Error al cambiar la contraseña.",
     });
   }

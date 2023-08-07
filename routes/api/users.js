@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { User } = require("../../models");
-//const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-//const cote = require("cote");
-//const sgMail = require("@sendgrid/mail");
 
+//DONE returns all users
+/**
+ *  GET /users
+ *  returns all users
+ */
 router.get("/", async (req, res, next) => {
   try {
     let users = {};
@@ -17,6 +19,11 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+//DONE returns the user searched for by email
+/**
+ *  GET /users/email (body)
+ *  returns the user searched for by email
+ */
 router.get("/email/:email", async (req, res, next) => {
   try {
     let email = req.params.email;
@@ -28,135 +35,68 @@ router.get("/email/:email", async (req, res, next) => {
   }
 });
 
-// // Ruta para solicitar recuperación de contraseña
-// router.post("/recover-password", async (req, res) => {
-//   const { to } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
-//   try {
-//     await User.microEmailService(to);
-//     //await microEmailService({ type: "send_email", to: to });
-//     res.status(200).json({
-//       message: "Correo de recuperación de contraseña enviado correctamente.",
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       error: "Error al enviar el correo de recuperación de contraseña.",
-//     });
-//   }
-// });
-
-// Ruta para enviar un correo de recuperacion de contraseña
+//DONE Route to send a password recovery email
+/**
+ *  POST /users/email-password (body)
+ *  returns an email with a url that has the resetpassword token and the user's email
+ */
 router.post("/email-password", async (req, res) => {
-  const { to } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
+  const { to } = req.body;
 
   try {
     await User.microEmailService(to);
 
     res.status(200).json({
-      message: "Correo de recuperación de contraseña enviado correctamente.",
+      message: "Password recovery email sent successfully.",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Error al enviar el correo de recuperación de contraseña.",
+      error: "Error sending password recovery email.",
     });
   }
 });
 
-// Ruta para solicitar recuperación de contraseña
-
+//DONE Route to request password recovery
+/**
+ *  POST /users/recover-password (body)
+ *  if the url token and the token inside resetpassword match, the password is changed
+ */
 router.post("/recover-password", async (req, res) => {
   const { email, token, newPassword } = req.body;
 
   try {
-    // Verificar si el token de la URL es válido y decodificarlo
+    //NOTE Check if the URL token is valid and decode it
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Obtener el ID del usuario desde el token decodificado
+    //NOTE Get user ID from decoded token
     const userId = decodedToken.userId;
 
     console.log("token decodi", decodedToken);
 
-    // Obtener el usuario desde la base de datos utilizando el ID del usuario
+    //NOTE Get user from database using user id
     const user = await User.findUserById(userId);
     console.log("usuario", user);
 
-    // Verificar si el token almacenado en la base de datos coincide con el token de la URL
+    //NOTE Check if the token stored in the database matches the token in the URL
     if (user && user.resetpassword === token) {
-      // Si el token coincide, proceder a cambiar la contraseña
+      //NOTE If the token matches, proceed to change the password
       await User.resetPassword(email, token, newPassword);
 
       return res.status(200).json({
-        message: "Contraseña cambiada correctamente",
+        message: "Password changed successfully",
       });
     } else {
       return res.status(400).json({
-        error: "Token inválido o expirado.",
+        error: "Invalid or expired token.",
       });
     }
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: "Error al cambiar la contraseña.",
+      error: "Failed to change password.",
     });
   }
 });
 
 module.exports = router;
-
-// // Ruta para solicitar recuperación de contraseña
-// router.post("/recover-password", async (req, res) => {
-//   const { to } = req.body; // Suponiendo que el email se envía en el cuerpo de la solicitud
-
-//   const user = await User.findOne({ email: to });
-//   console.log(user);
-
-//   if (!user) {
-//     return res.status(404).json({ error: "Usuario no encontrado" });
-//   }
-
-//   // Borramos el campo resetpassword antes de almacenar el nuevo valor
-//   user.resetpassword = "";
-
-//   // Aquí generas el token de recuperación de contraseña
-//   const token = jwt.sign(
-//     { resetpassword: user.resetpassword },
-//     process.env.JWT_SECRET,
-//     {
-//       expiresIn: "1h",
-//     },
-//   );
-
-//   user.resetpassword = token;
-//   await user.save();
-
-//   console.log("token", token);
-
-//   //console.log("clave", process.env.MONGODB_CONNECTION_STR);
-//   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-//   const msg = {
-//     to: to, // Change to your recipient
-//     from: process.env.EMAIL_SEND_GRID, // Change to your verified sender
-//     templateId: process.env.TEMPLATE_ID_SEND_GRID, // Reemplaza con el ID de tu plantilla
-//     dynamic_template_data: {
-//       // Agrega aquí las variables que utilizarás en tu plantilla
-//       email: to,
-//       token: token,
-//       subject: "Sending with SendGrid is Fun",
-//       message: "and easy to do anywhere, even with Node.js",
-//     },
-//   };
-//   console.log(msg);
-//   sgMail
-//     .send(msg)
-//     .then(() => {
-//       console.log("Email sent");
-//     })
-
-//     .catch(error => {
-//       console.error(error);
-//     });
-//   res.status(200).json({
-//     message: "Correo de recuperación de contraseña enviado correctamente.",
-//   });
-// });

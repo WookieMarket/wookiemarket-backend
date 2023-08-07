@@ -39,10 +39,10 @@ userSchema.statics.findByEmail = function (email) {
   return query;
 };
 
-// Definir el método estático para buscar un usuario por su ID
+//DONE Define the static method to look up a user by their ID
 userSchema.statics.findUserById = function (userId) {
-  // Utilizar el método 'findById' de Mongoose para buscar un usuario por su ID
-  return User.findById(userId);
+  const query = User.findById(userId);
+  return query;
 };
 
 //DONE method that sends an email that contains the user's own email and a token to change the password
@@ -51,7 +51,7 @@ userSchema.statics.microEmailService = async function (to) {
     const user = await User.findOne({ email: to });
 
     if (!user) {
-      throw new Error("Usuario no encontrado");
+      throw new Error("user not found");
     }
 
     //NOTE We clear the resetpassword field before storing the new value
@@ -80,35 +80,39 @@ userSchema.statics.microEmailService = async function (to) {
 
     return new Promise(resolve => requester.send(emailRequest, resolve));
   } catch (error) {
-    throw new Error("Error al enviar el correo de recuperación de contraseña.");
+    throw new Error("Error sending password recovery email.");
   }
 };
 
-// Método estático para resetear la contraseña
+//DONE Static method to reset password
+
 userSchema.statics.resetPassword = async function (email, token, newPassword) {
   try {
-    // Buscar al usuario en la base de datos por su email
+    //NOTE Buscar al usuario en la base de datos por su email
+
     const user = await this.findOne({ email: email, resetpassword: token });
 
-    // Si no se encuentra al usuario o el token no coincide, retornar un error
+    //NOTE Si no se encuentra al usuario o el token no coincide, retornar un error
     if (!user) {
-      throw new Error("Token de recuperación inválido o usuario no encontrado");
+      throw new Error("Invalid recovery token or user not found");
     }
 
-    // Encriptar la nueva contraseña utilizando la función hashPassword
+    //NOTE Encriptar la nueva contraseña utilizando la función hashPassword
     const hashedPassword = await this.hashPassword(newPassword);
 
-    // Actualizar la contraseña del usuario con la nueva contraseña encriptada
+    //NOTE Actualizar la contraseña del usuario con la nueva contraseña encriptada
     user.password = hashedPassword;
-    user.resetpassword = ""; // Borrar el token de recuperación una vez que se ha utilizado
+
+    //NOTE Delete the recovery token after it has been used
+    user.resetpassword = "";
 
     await user.save();
 
-    // Responder con un mensaje de éxito
-    return { message: "Contraseña modificada con éxito" };
+    //NOTE Responder con un mensaje de éxito
+    return { message: "Password changed successfully" };
   } catch (error) {
     console.error(error);
-    throw new Error("Error al cambiar la contraseña.");
+    throw new Error("Failed to change password.");
   }
 };
 

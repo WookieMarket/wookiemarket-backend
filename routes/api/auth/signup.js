@@ -11,6 +11,7 @@ const createError = require("http-errors");
 router.post("/", async (req, res, next) => {
   try {
     // retrieve user data
+    // console.log(req.body);
     const { username, password, email } = req.body;
 
     // Register new user

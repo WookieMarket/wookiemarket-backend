@@ -1,7 +1,11 @@
 # dependencies
 node_modules
 
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
 # misc
 .DS_Store
-.env.local
 .env
+.env.test

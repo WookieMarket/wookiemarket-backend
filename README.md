@@ -12,6 +12,14 @@
     npm run dev
 ```
 
+## start the email microservice
+
+### open a new console position yourself in the emailMicroService folder and run this command
+
+```
+npm node emailService.js
+```
+
 ## Setup enviroments variables
 
 - Copy `.env.example` to `.env` and customize your local variables.

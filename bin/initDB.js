@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 // Import local variable values
-require('dotenv').config();
+require("dotenv").config();
 
-const { User } = require('../models');
-const connection = require('../lib/connectMongoose');
+const { User } = require("../models");
+const connection = require("../lib/connectMongoose");
 
-main().catch(err => console.log('There was a error', err));
+main().catch(err => console.log("There was a error", err));
 
 async function main() {
   // initialize user collection
@@ -25,22 +25,22 @@ async function initUsers() {
   console.log(`Eliminated ${deleted.deletedCount} users.`);
 
   // Load users
-  const list = await loadDataFrom('./models/Users.json');
+  const list = await loadDataFrom("./models/Users.json");
 
   try {
     const users = await Promise.all(
       list.map(async user => {
-        const { email, password, username } = user;
+        const { email, password, username, resetpassword } = user;
         const hashedPassword = await User.hashPassword(password);
-        return { email, password: hashedPassword, username };
-      })
+        return { email, password: hashedPassword, username, resetpassword };
+      }),
     );
 
     console.log(users);
     const inserted = await User.create(users);
     console.log(`Importing users...'${inserted}`);
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
   }
 }
 
@@ -50,8 +50,8 @@ async function initUsers() {
  * @returns list of items
  */
 async function loadDataFrom(path) {
-  const fs = require('fs');
-  const items = await JSON.parse(fs.readFileSync(path, 'utf-8'));
+  const fs = require("fs");
+  const items = await JSON.parse(fs.readFileSync(path, "utf-8"));
   //console.log('Reading JSON', items);
   return items;
 }

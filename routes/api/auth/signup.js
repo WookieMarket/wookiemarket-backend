@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { User } = require('../../../models');
-const createError = require('http-errors');
+const { User } = require("../../../models");
+const createError = require("http-errors");
 
 /**
  *  POST /auth/signup (body)
  *  Create a user account, the corresponding session and returns a JWT Token,
  *  if no error encountered
  */
-router.post('/', async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     // retrieve user data
     const { username, password, email } = req.body;
@@ -19,6 +19,7 @@ router.post('/', async (req, res, next) => {
       email,
       password: hashedPassword,
       username,
+      resetpassword: "",
     });
     console.log(`New account created.'${addedUser}`);
 
@@ -26,7 +27,7 @@ router.post('/', async (req, res, next) => {
     next();
   } catch (err) {
     if (err.code == 11000) {
-      let m = '';
+      let m = "";
       if (err.keyValue.username) {
         message = `Username: ${err.keyValue.username} is already taken!`;
       } else if (err.keyValue.email) {

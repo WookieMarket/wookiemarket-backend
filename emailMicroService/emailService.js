@@ -1,4 +1,3 @@
-// email-responder.js
 "use strict";
 const cote = require("cote");
 const sgMail = require("@sendgrid/mail");

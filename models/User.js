@@ -88,19 +88,19 @@ userSchema.statics.microEmailService = async function (to) {
 
 userSchema.statics.resetPassword = async function (email, token, newPassword) {
   try {
-    //NOTE Buscar al usuario en la base de datos por su email
+    //NOTE Search for the user in the database by their email
 
     const user = await this.findOne({ email: email, resetpassword: token });
 
-    //NOTE Si no se encuentra al usuario o el token no coincide, retornar un error
+    //NOTE If the user is not found or the token does not match, return an error
     if (!user) {
       throw new Error("Invalid recovery token or user not found");
     }
 
-    //NOTE Encriptar la nueva contraseña utilizando la función hashPassword
+    //NOTE Encrypt the new password using the hashPassword function
     const hashedPassword = await this.hashPassword(newPassword);
 
-    //NOTE Actualizar la contraseña del usuario con la nueva contraseña encriptada
+    //NOTE Update the user's password with the new encrypted password
     user.password = hashedPassword;
 
     //NOTE Delete the recovery token after it has been used
@@ -108,7 +108,7 @@ userSchema.statics.resetPassword = async function (email, token, newPassword) {
 
     await user.save();
 
-    //NOTE Responder con un mensaje de éxito
+    //NOTE Reply with a success message
     return { message: "Password changed successfully" };
   } catch (error) {
     console.error(error);

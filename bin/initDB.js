@@ -3,7 +3,7 @@
 // Import local variable values
 require("dotenv").config();
 
-const { User } = require("../models");
+const { Advert, User } = require("../models");
 const connection = require("../lib/connectMongoose");
 
 main().catch(err => console.log("There was a error", err));
@@ -11,6 +11,9 @@ main().catch(err => console.log("There was a error", err));
 async function main() {
   // initialize user collection
   await initUsers();
+
+  // initialize Advert collection
+  await initAdverts();
 
   // close connection
   connection.close();
@@ -44,6 +47,9 @@ async function initUsers() {
   }
 }
 
+/**
+ *  Loads Advert data and create Adverts instances
+ */
 async function initAdverts() {
   // Delete all documents in the advert collection
   const deleted = await Advert.deleteMany();

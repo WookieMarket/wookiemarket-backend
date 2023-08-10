@@ -44,6 +44,17 @@ async function initUsers() {
   }
 }
 
+async function initAdverts() {
+  // Delete all documents in the advert collection
+  const deleted = await Advert.deleteMany();
+  console.log(`Deleted ${deleted.deletedCount} adverts.`);
+
+  // Create initial advertisements
+  const inserted = await Advert.insertMany(advertData);
+
+  console.log(`Created ${inserted.length} adverts.`);
+}
+
 /**
  * This loads data from a given file path
  * @param {String} path where the JSON file is allocated

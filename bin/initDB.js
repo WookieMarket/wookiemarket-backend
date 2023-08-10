@@ -55,10 +55,42 @@ async function initAdverts() {
   const deleted = await Advert.deleteMany();
   console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
-  // Create initial advertisements
-  const inserted = await Advert.insertMany(advertData);
+  // Load advert
+  const list = await loadDataFrom("./models/Adverts.json");
 
-  console.log(`Created ${inserted.length} adverts.`);
+  try {
+    const adverts = await Promise.all(
+      list.map(async advert => {
+        const {
+          name,
+          onSale,
+          price,
+          image,
+          category,
+          description,
+          status,
+          coin,
+        } = advert;
+
+        return {
+          name,
+          onSale,
+          price,
+          image,
+          category,
+          description,
+          status,
+          coin,
+        };
+      }),
+    );
+
+    console.log(adverts);
+    const inserted = await Advert.create(adverts);
+    console.log(`Importing adverts...'${inserted}`);
+  } catch (error) {
+    console.log("error", error);
+  }
 }
 
 /**

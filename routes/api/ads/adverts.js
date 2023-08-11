@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { Advert } = require("../../../models");
+const upload = require("../../../lib/uploadConfigure");
 
 //DONE I create an ad
 /**
  *  POST api/ads/adverts/create (body)
  *  Create an advert
  */
-router.post("/create", async (req, res, next) => {
+router.post("/create", upload.single("image"), async (req, res, next) => {
   try {
     const adData = req.body;
 

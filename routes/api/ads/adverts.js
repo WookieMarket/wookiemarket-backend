@@ -12,7 +12,11 @@ router.post("/create", upload.single("image"), async (req, res, next) => {
   try {
     const adData = req.body;
 
-    adData.img = req.file ? req.file.filename : "";
+    const imageFilename = req.file ? req.file.filename : "";
+    //NOTE Url for the image that is saved in the DB
+    const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+
+    adData.image = imageUrl;
 
     //NOTE I create an instance of Agent in memory
     const ad = new Advert(adData);
@@ -22,7 +26,7 @@ router.post("/create", upload.single("image"), async (req, res, next) => {
     res.json({ result: saveAd });
 
     console.log(
-      `Creado con éxito anuncio con id ${saveAd.id} y nombre ${saveAd.name}`,
+      `Successfully created ad with id ${saveAd.id} and name ${saveAd.name}`,
     );
   } catch (error) {
     next(error);

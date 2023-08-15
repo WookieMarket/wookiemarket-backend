@@ -20,6 +20,8 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
   query.limit(limit);
   query.sort(sort);
   query.select(fields);
+
+  //TODO necesitamos saber el total de anuncios que hay en la BD para luego la paginacón
   return query.exec();
 };
 

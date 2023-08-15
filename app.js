@@ -3,15 +3,10 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-//const jwtAuthApiMiddlewar = require("./lib/jwtAuthApiMiddleware");
-
-//const LoginControllerApi = require("./controllers/loginControllerApi");
-//const MongoStore = require("connect-mongo");
 
 require("./lib/connectMongoose");
 
 var indexRouter = require("./routes/index");
-//var authRouter = require("./routes/api/auth/signup");
 var usersRouter = require("./routes/users");
 
 var app = express();
@@ -51,9 +46,6 @@ app.use(
 app.use("/api/auth/login", require("./routes/api/auth/login"));
 app.use("/api/users", require("./routes/api/users"));
 app.use("/api/ads/adverts", require("./routes/api/ads/adverts"));
-// app.use("/api/users/email", require("./routes/api/users"));
-// app.post("/api/users/recover-password", require("./routes/api/users"));
-// app.post("/api/users/email-password", require("./routes/api/users"));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

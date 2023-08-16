@@ -9,30 +9,30 @@ const advertData = require('./adverts');
 main().catch((err) => console.log('There was a error', err));
 
 async function main() {
-    // initialize user collection
-    await initUsers();
+  // initialize user collection
+  await initUsers();
 
-    // initialize advert collection
-    await initAdverts();
+  // initialize advert collection
+  await initAdverts();
 
-    // close connection
-    connection.close();
+  // close connection
+  connection.close();
 }
 
 /**
  *  Loads user data and create Users instances
  */
 async function initUsers() {
-    // Drop data from Users collection
+  // Drop data from Users collection
   const deleted = await User.deleteMany();
-    console.log(`Eliminated ${deleted.deletedCount} users.`);
+  console.log(`Eliminated ${deleted.deletedCount} users.`);
 
   // Load users
   const list = await loadDataFrom('./models/Users.json');
 
   try {
     const users = await Promise.all(
-      list.map(async user => {
+      list.map(async (user) => {
         const { email, password, username } = user;
         const hashedPassword = await User.hashPassword(password);
         return { email, password: hashedPassword, username };
@@ -45,6 +45,17 @@ async function initUsers() {
   } catch (error) {
     console.log('error', error);
   }
+}
+
+async function initAdverts() {
+  // Delete all documents in the advert collection
+  const deleted = await Advert.deleteMany();
+  console.log(`Deleted ${deleted.deletedCount} adverts.`);
+
+  // Create initial advertisements
+  const inserted = await Advert.insertMany(advertData);
+
+  console.log(`Created ${inserted.length} adverts.`);
 }
 
 /**

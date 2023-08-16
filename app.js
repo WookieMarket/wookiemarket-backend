@@ -3,11 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+
 const logger = require('morgan');
 
-const LoginControllerApi = require("./controllers/loginControllerApi");
+const LoginControllerApi = require('./controllers/loginControllerApi');
 //const jwtAuthApiMiddlewar = require("./lib/jwtAuthApiMiddleware");
-const MongoStore = require("connect-mongo");
+const MongoStore = require('connect-mongo');
 
 require('./lib/connectMongoose');
 
@@ -15,11 +16,10 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
-const cors = require("cors");
 
 //NOTE Configure CORS options to allow requests from localhost:3000
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: 'http://localhost:3000',
   optionsSuccessStatus: 200, // Some older browsers (IE11, various SmartTVs) will interpret 204 as 'no content'
 };
 
@@ -34,6 +34,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+
+console.log('Ruta de acceso a la imagen:', path.join(__dirname, 'public', 'Death_Star_III.webp'))
 
 const bodyParser = require('body-parser');
 
@@ -56,32 +58,32 @@ app.use('/adverts', advertsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    next(createError(404));
+  next(createError(404));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
-    // check if it is a validation error
-    if (err.array) {
-        const errorInfo = err.errors[0];
-        err.message = `Error en ${errorInfo.location}, parámetro ${errorInfo.param} ${errorInfo.msg}`;
-        err.status = 422;
-    }
+  // check if it is a validation error
+  if (err.array) {
+    const errorInfo = err.errors[0];
+    err.message = `Error en ${errorInfo.location}, parámetro ${errorInfo.param} ${errorInfo.msg}`;
+    err.status = 422;
+  }
 
-    // if what has failed is a request to the API
-    // I return the error in JSON format
-    if (req.originalUrl.startsWith('/api/')) {
-        res.json({ error: err.message });
-        return;
-    }
+  // if what has failed is a request to the API
+  // I return the error in JSON format
+  if (req.originalUrl.startsWith('/api/')) {
+    res.json({ error: err.message });
+    return;
+  }
 
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
-    res.status(err.status || 500);
-    res.render('error');
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
 // const port = 3001;

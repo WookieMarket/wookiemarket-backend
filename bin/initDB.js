@@ -1,18 +1,18 @@
-'use strict';
-require('dotenv').config();
+"use strict";
 
-const { Advert, User } = require('../models');
-const connection = require('../lib/connectMongoose');
-const users = require('./users');
-const advertData = require('./adverts');
+// Import local variable values
+require("dotenv").config();
 
-main().catch((err) => console.log('There was a error', err));
+const { Advert, User } = require("../models");
+const connection = require("../lib/connectMongoose");
+
+main().catch(err => console.log("There was a error", err));
 
 async function main() {
   // initialize user collection
   await initUsers();
 
-  // initialize advert collection
+  // initialize Advert collection
   await initAdverts();
 
   // close connection
@@ -28,34 +28,69 @@ async function initUsers() {
   console.log(`Eliminated ${deleted.deletedCount} users.`);
 
   // Load users
-  const list = await loadDataFrom('./models/Users.json');
+  const list = await loadDataFrom("./models/Users.json");
 
   try {
     const users = await Promise.all(
-      list.map(async (user) => {
-        const { email, password, username } = user;
+      list.map(async user => {
+        const { email, password, username, resetpassword } = user;
         const hashedPassword = await User.hashPassword(password);
-        return { email, password: hashedPassword, username };
-      })
+        return { email, password: hashedPassword, username, resetpassword };
+      }),
     );
 
     console.log(users);
     const inserted = await User.create(users);
     console.log(`Importing users...'${inserted}`);
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
   }
 }
 
+/**
+ *  Loads Advert data and create Adverts instances
+ */
 async function initAdverts() {
   // Delete all documents in the advert collection
   const deleted = await Advert.deleteMany();
   console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
-  // Create initial advertisements
-  const inserted = await Advert.insertMany(advertData);
+  // Load advert
+  const list = await loadDataFrom("./models/Adverts.json");
 
-  console.log(`Created ${inserted.length} adverts.`);
+  try {
+    const adverts = await Promise.all(
+      list.map(async advert => {
+        const {
+          name,
+          onSale,
+          price,
+          image,
+          category,
+          description,
+          status,
+          coin,
+        } = advert;
+
+        return {
+          name,
+          onSale,
+          price,
+          image,
+          category,
+          description,
+          status,
+          coin,
+        };
+      }),
+    );
+
+    console.log(adverts);
+    const inserted = await Advert.create(adverts);
+    console.log(`Importing adverts...'${inserted}`);
+  } catch (error) {
+    console.log("error", error);
+  }
 }
 
 /**
@@ -64,8 +99,8 @@ async function initAdverts() {
  * @returns list of items
  */
 async function loadDataFrom(path) {
-  const fs = require('fs');
-  const items = await JSON.parse(fs.readFileSync(path, 'utf-8'));
+  const fs = require("fs");
+  const items = await JSON.parse(fs.readFileSync(path, "utf-8"));
   //console.log('Reading JSON', items);
   return items;
 }

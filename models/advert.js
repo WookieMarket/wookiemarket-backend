@@ -11,6 +11,8 @@ const advertSchema = mongoose.Schema({
   description: String,
   status: { type: String, index: true },
   coin: { type: String, default: "€", index: true },
+  createdAt: { type: String, index: true },
+  username: { type: String, index: true },
 });
 
 // Static methods filter adverts

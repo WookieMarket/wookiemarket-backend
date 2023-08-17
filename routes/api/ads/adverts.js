@@ -72,6 +72,7 @@ router.get('/', async (req, res, next) => {
     );
 
     res.json(advertsList);
+    console.log('Listado de anuncios: ' + advertsList)
   } catch (error) {
     next(error);
   }

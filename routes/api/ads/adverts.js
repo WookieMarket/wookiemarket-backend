@@ -71,7 +71,7 @@ router.get('/', async (req, res, next) => {
       fields
     );
 
-    res.json({ results: advertsList });
+    res.json(advertsList);
   } catch (error) {
     next(error);
   }

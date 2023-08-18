@@ -1,6 +1,6 @@
 const request = require('supertest');
 require('dotenv').config();
-const app = require('../../app');
+const app = require('../../app.js');
 const dbConnection = require('../../lib/connectMongoose');
 const { User } = require('../../models');
 
@@ -20,6 +20,7 @@ describe('Test POST /api/auth/signup endpoint', () => {
     //post.send.expect.then
     const response = await request(app).post('/api/auth/signup').send(userData);
 
+    console.log(response);
     // Check the response
     expect(response.statusCode).toBe(200);
 

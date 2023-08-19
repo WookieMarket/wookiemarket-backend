@@ -37,6 +37,18 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+//return an advert by Id
+router.get("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const advert = await Advert.findById(id);
+    res.json({ result: advert });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 //DONE I create an ad
 /**
  *  POST api/ads/adverts/create (body)

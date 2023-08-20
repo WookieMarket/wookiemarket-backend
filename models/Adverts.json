@@ -1,8 +1,5 @@
 [
   {
-    "_id": {
-      "$oid": "64dd1f47a05b0d8d1510b74b"
-    },
     "name": "Deadth Star III",
     "onSale": true,
     "price": 850000000000000000,
@@ -18,9 +15,6 @@
     "__v": 0
   },
   {
-    "_id": {
-      "$oid": "64dd1f81a05b0d8d1510b74e"
-    },
     "name": "Peluche Wookie",
     "onSale": false,
     "price": 20,
@@ -36,9 +30,6 @@
     "__v": 0
   },
   {
-    "_id": {
-      "$oid": "64dd1fbba05b0d8d1510b751"
-    },
     "name": "Casco Mandolariano",
     "onSale": true,
     "price": 300,
@@ -54,9 +45,6 @@
     "__v": 0
   },
   {
-    "_id": {
-      "$oid": "64dd2012a05b0d8d1510b754"
-    },
     "name": "B-Wing Starfighter",
     "onSale": true,
     "price": 10,
@@ -72,5 +60,3 @@
     "__v": 0
   }
 ]
-
-

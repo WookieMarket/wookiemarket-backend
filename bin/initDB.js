@@ -10,10 +10,10 @@ main().catch(err => console.log('There was a error', err));
 
 async function main() {
   // initialize user collection
-  //await initUsers();
+  await initUsers();
 
   // initialize Advert collection
-  //await initAdverts();
+  await initAdverts();
 
   // close connection
   connection.close();

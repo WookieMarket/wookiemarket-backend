@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const cote = require("cote");
-const sgMail = require("@sendgrid/mail");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cote = require('cote');
+const sgMail = require('@sendgrid/mail');
 
-const requester = new cote.Requester({ name: "email-requester" });
+const requester = new cote.Requester({ name: 'email-requester' });
 
 //DONE Create Schema Users
 
@@ -51,15 +51,15 @@ userSchema.statics.microEmailService = async function (to) {
     const user = await User.findOne({ email: to });
 
     if (!user) {
-      throw new Error("user not found");
+      throw new Error('user not found');
     }
 
     //NOTE We clear the resetpassword field before storing the new value
-    user.resetpassword = "";
+    user.resetpassword = '';
 
     //NOTE Here you generate the password recovery token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: '1h',
     });
 
     //NOTE I delete the old token before re-saving the new one
@@ -68,7 +68,7 @@ userSchema.statics.microEmailService = async function (to) {
 
     //NOTE Send the message to the microservice to send the email
     const emailRequest = {
-      type: "send_email",
+      type: 'send_email',
       to: to,
       from: process.env.EMAIL_SEND_GRID,
       templateId: process.env.TEMPLATE_ID_SEND_GRID,
@@ -80,7 +80,7 @@ userSchema.statics.microEmailService = async function (to) {
 
     return new Promise(resolve => requester.send(emailRequest, resolve));
   } catch (error) {
-    throw new Error("Error sending password recovery email.");
+    throw new Error('Error sending password recovery email.');
   }
 };
 
@@ -94,7 +94,7 @@ userSchema.statics.resetPassword = async function (email, token, newPassword) {
 
     //NOTE If the user is not found or the token does not match, return an error
     if (!user) {
-      throw new Error("Invalid recovery token or user not found");
+      throw new Error('Invalid recovery token or user not found');
     }
 
     //NOTE Encrypt the new password using the hashPassword function
@@ -104,20 +104,20 @@ userSchema.statics.resetPassword = async function (email, token, newPassword) {
     user.password = hashedPassword;
 
     //NOTE Delete the recovery token after it has been used
-    user.resetpassword = "";
+    user.resetpassword = '';
 
     await user.save();
 
     //NOTE Reply with a success message
-    return { message: "Password changed successfully" };
+    return { message: 'Password changed successfully' };
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to change password.");
+    throw new Error('Failed to change password.');
   }
 };
 
 //NOTE create model
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

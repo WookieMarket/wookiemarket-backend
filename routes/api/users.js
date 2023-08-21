@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../../models");
 const jwt = require("jsonwebtoken");
+const { microEmailService } = require("../../lib/resetEmailConfiguration");
+const { resetPassword } = require("../../lib/resetEmailConfiguration");
 
 //DONE returns all users
 /**
@@ -44,7 +46,7 @@ router.post("/email-password", async (req, res) => {
   const { to } = req.body;
 
   try {
-    await User.microEmailService(to);
+    await microEmailService(to);
 
     res.status(200).json({
       message: "Password recovery email sent successfully.",
@@ -81,7 +83,7 @@ router.post("/recover-password", async (req, res) => {
     //NOTE Check if the token stored in the database matches the token in the URL
     if (user && user.resetpassword === token) {
       //NOTE If the token matches, proceed to change the password
-      await User.resetPassword(email, token, newPassword);
+      await resetPassword(email, token, newPassword);
 
       return res.status(200).json({
         message: "Password changed successfully",
@@ -94,7 +96,7 @@ router.post("/recover-password", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: "Failed to change password.",
+      error: error.message,
     });
   }
 });

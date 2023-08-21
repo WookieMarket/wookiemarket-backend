@@ -36,7 +36,7 @@ async function initUsers() {
         const { email, password, username, resetpassword } = user;
         const hashedPassword = await User.hashPassword(password);
         return { email, password: hashedPassword, username, resetpassword };
-      })
+      }),
     );
 
     console.log(users);

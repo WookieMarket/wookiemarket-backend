@@ -31,7 +31,10 @@ router.get('/', async (req, res, next) => {
       filter.name = { $regex: filterByName, $options: 'i' }; //Case-sensitive and case-insensitive and word-searchable
     }
     if (filterByCategory) {
-      filter.category = { $regex: filterByCategory, $options: 'i' };
+      const categories = filterByCategory
+      .split(',')
+      .map(category => new RegExp(category, 'i'));//Case-insensitive
+      filter.category = { $all: categories };
     }
 
     //TODO añadir resto de campos de filtardo: sale, category, price, coin

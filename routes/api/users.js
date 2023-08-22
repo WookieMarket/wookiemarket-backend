@@ -45,7 +45,7 @@ router.post('/email-password', async (req, res) => {
   const { to } = req.body;
 
   try {
-    await microEmailService(to);
+    await microserviceEmailConfig(to);
 
     res.status(200).json({
       message: 'Password recovery email sent successfully.',

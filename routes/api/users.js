@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../../models');
 const jwt = require('jsonwebtoken');
+const microserviceEmailConfig = require('../../lib/microServiceEmailConfig');
 
 //DONE returns all users
 /**
@@ -44,7 +45,7 @@ router.post('/email-password', async (req, res) => {
   const { to } = req.body;
 
   try {
-    await User.microEmailService(to);
+    await microEmailService(to);
 
     res.status(200).json({
       message: 'Password recovery email sent successfully.',

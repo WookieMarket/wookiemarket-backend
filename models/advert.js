@@ -23,10 +23,15 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
   query.sort(sort);
   query.select(fields);
 
-  //TODO necesitamos saber el total de anuncios que hay en la BD para luego la paginacón
   return query.exec();
 };
 
+//How many ads are there?
+advertSchema.statics.count = function (filter) {
+  return Advert.countDocuments(filter).exec();
+};
+
+//Categories
 advertSchema.statics.distinctCategories = function () {
   const query = Advert.distinct('category');
   return query.exec();

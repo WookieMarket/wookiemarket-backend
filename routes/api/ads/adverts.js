@@ -4,11 +4,9 @@ const { Advert, User } = require('../../../models');
 const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddlewar = require('../../../lib/jwtAuthApiMiddleware');
 
+/* GET api/ads/adverts*/
 // Returns a list of ads
-/**
- *  GET api/ads/adverts
- *  Returns a list of ads
- */
+
 router.get('/', async (req, res, next) => {
   try {
     // Order by "created at"
@@ -35,7 +33,7 @@ router.get('/', async (req, res, next) => {
     if (filterByCategory) {
       const categories = filterByCategory
         .split(',')
-        .map((category) => new RegExp(category, 'i')); //Case-insensitive
+        .map((category) => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
       filter.category = { $all: categories };
     }
     if (filterByMinPrice) {
@@ -47,15 +45,13 @@ router.get('/', async (req, res, next) => {
     if (filterByPrice) {
       filter.price = Number(filterByPrice);
     }
-    //TODO añadir resto de campos de filtardo: sale, category, price, coin
-
+    
     const [advertsList, total] = await Promise.all([
       Advert.list(filter, skip, limit, sort, fields),
       Advert.count(filter),
     ]);
     res.json({ results: advertsList, total });
-    //const advertsList = await Advert.list(filter, skip, limit, sort, fields);
-    //res.json({ results: advertsList });
+
   } catch (error) {
     next(error);
   }
@@ -82,11 +78,10 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-//DONE I create an ad
-/**
- *  POST api/ads/adverts/create (body)
- *  Create an advert
- */
+
+/*POST api/ads/adverts/create (body) */
+
+//Create an advert
 router.post(
   '/create',
   jwtAuthApiMiddlewar,

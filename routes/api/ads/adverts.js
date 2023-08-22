@@ -25,6 +25,8 @@ router.get('/', async (req, res, next) => {
     // Filters
     const filterByName = req.query.name;
     const filterByCategory = req.query.category;
+    const filterByMinPrice = req.query.minPrice || 0;
+    const filterByMaxPrice = req.query.maxPrice || Infinity;
     const filterByPrice = req.query.price;
     const filter = {};
     if (filterByName) {
@@ -32,11 +34,19 @@ router.get('/', async (req, res, next) => {
     }
     if (filterByCategory) {
       const categories = filterByCategory
-      .split(',')
-      .map(category => new RegExp(category, 'i'));//Case-insensitive
+        .split(',')
+        .map((category) => new RegExp(category, 'i')); //Case-insensitive
       filter.category = { $all: categories };
     }
-
+    if (filterByMinPrice) {
+      filter.price = { ...filter.price, $gte: Number(filterByMinPrice) };
+    }
+    if (filterByMaxPrice) {
+      filter.price = { ...filter.price, $lte: Number(filterByMaxPrice) };
+    }
+    if (filterByPrice) {
+      filter.price = Number(filterByPrice);
+    }
     //TODO añadir resto de campos de filtardo: sale, category, price, coin
 
     const [advertsList, total] = await Promise.all([
@@ -71,7 +81,6 @@ router.get('/:id', async (req, res, next) => {
     next(error);
   }
 });
-
 
 //DONE I create an ad
 /**

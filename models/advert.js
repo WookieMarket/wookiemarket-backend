@@ -27,8 +27,8 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
 };
 
 //How many ads are there?
-advertSchema.statics.count = function (filter) {
-  return Advert.countDocuments(filter).exec();
+advertSchema.statics.countAds = function (filter) {
+  return this.countDocuments(filter).exec();
 };
 
 //Categories

@@ -9,7 +9,7 @@ const jwtAuthApiMiddlewar = require('../../../lib/jwtAuthApiMiddleware');
 
 router.get('/', async (req, res, next) => {
   try {
-    // Order by "created at"
+        // Order by "created at"
     const sort = req.query.sort;
 
     // Pagination
@@ -50,6 +50,10 @@ router.get('/', async (req, res, next) => {
       Advert.list(filter, skip, limit, sort, fields),
       Advert.count(filter),
     ]);
+
+    const totalCountAds = await Advert.countAds(filter);
+    console.log(`Total count of matching adverts: ${totalCountAds}`);
+
     res.json({ results: advertsList, total });
 
   } catch (error) {

@@ -1,8 +1,5 @@
 [
   {
-    "_id": {
-      "$oid": "64dd1f47a05b0d8d1510b74b"
-    },
     "name": "Deadth Star III",
     "onSale": true,
     "price": 850000000000000000,
@@ -14,13 +11,9 @@
     "status": "true",
     "coin": "€",
     "createdAt": "Wed Aug 16 2023 21:11:03 GMT+0200 (hora de verano de Europa central)",
-    "username": "mando2",
-    "__v": 0
+    "username": "mando2"
   },
   {
-    "_id": {
-      "$oid": "64dd1f81a05b0d8d1510b74e"
-    },
     "name": "Peluche Wookie",
     "onSale": false,
     "price": 20,
@@ -32,13 +25,9 @@
     "status": "true",
     "coin": "€",
     "createdAt": "Wed Aug 16 2023 21:12:01 GMT+0200 (hora de verano de Europa central)",
-    "username": "mando2",
-    "__v": 0
+    "username": "mando2"
   },
   {
-    "_id": {
-      "$oid": "64dd1fbba05b0d8d1510b751"
-    },
     "name": "Casco Mandolariano",
     "onSale": true,
     "price": 300,
@@ -50,17 +39,13 @@
     "status": "false",
     "coin": "wupiupi",
     "createdAt": "Wed Aug 16 2023 21:12:59 GMT+0200 (hora de verano de Europa central)",
-    "username": "mando2",
-    "__v": 0
+    "username": "mando2"
   },
   {
-    "_id": {
-      "$oid": "64dd2012a05b0d8d1510b754"
-    },
     "name": "B-Wing Starfighter",
     "onSale": true,
     "price": 10,
-    "image": "http://localhost:3001/images/image-1692213266224-B-Wing Starfighter.jpg",
+    "image": "http://localhost:3001/images/image-1692213266224-B-Wing_Starfighter.jpg",
     "category": [
       "Rebels"
     ],
@@ -68,9 +53,6 @@
     "status": "false",
     "coin": "€",
     "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
-    "username": "mando2",
-    "__v": 0
+    "username": "mando2"
   }
 ]
-
-

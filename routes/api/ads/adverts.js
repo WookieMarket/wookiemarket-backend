@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const { Advert, User } = require('../../../models');
 const upload = require('../../../lib/uploadConfigure');

@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
 // Import local variable values
-require("dotenv").config();
+require('dotenv').config();
 
-const { Advert, User } = require("../models");
-const connection = require("../lib/connectMongoose");
+const { Advert, User } = require('../models');
+const connection = require('../lib/connectMongoose');
 
-main().catch(err => console.log("There was a error", err));
+main().catch(err => console.log('There was a error', err));
 
 async function main() {
   // initialize user collection
@@ -28,7 +28,7 @@ async function initUsers() {
   console.log(`Eliminated ${deleted.deletedCount} users.`);
 
   // Load users
-  const list = await loadDataFrom("./models/Users.json");
+  const list = await loadDataFrom('./models/Users.json');
 
   try {
     const users = await Promise.all(
@@ -43,7 +43,7 @@ async function initUsers() {
     const inserted = await User.create(users);
     console.log(`Importing users...'${inserted}`);
   } catch (error) {
-    console.log("error", error);
+    console.log('error', error);
   }
 }
 
@@ -56,40 +56,13 @@ async function initAdverts() {
   console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
   // Load advert
-  const list = await loadDataFrom("./models/Adverts.json");
+  const adsList = await loadDataFrom('./models/Adverts.json');
 
   try {
-    const adverts = await Promise.all(
-      list.map(async advert => {
-        const {
-          name,
-          onSale,
-          price,
-          image,
-          category,
-          description,
-          status,
-          coin,
-        } = advert;
-
-        return {
-          name,
-          onSale,
-          price,
-          image,
-          category,
-          description,
-          status,
-          coin,
-        };
-      }),
-    );
-
-    console.log(adverts);
-    const inserted = await Advert.create(adverts);
+    const inserted = await Advert.create(adsList);
     console.log(`Importing adverts...'${inserted}`);
   } catch (error) {
-    console.log("error", error);
+    console.log('error', error);
   }
 }
 
@@ -99,8 +72,8 @@ async function initAdverts() {
  * @returns list of items
  */
 async function loadDataFrom(path) {
-  const fs = require("fs");
-  const items = await JSON.parse(fs.readFileSync(path, "utf-8"));
+  const fs = require('fs');
+  const items = await JSON.parse(fs.readFileSync(path, 'utf-8'));
   //console.log('Reading JSON', items);
   return items;
 }

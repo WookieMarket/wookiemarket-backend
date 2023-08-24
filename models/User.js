@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 //DONE Create Schema Users
 
@@ -38,6 +39,37 @@ userSchema.statics.findByEmail = function (email) {
 userSchema.statics.findUserById = function (userId) {
   const query = User.findById(userId);
   return query;
+};
+
+userSchema.statics.generateToken = function (id) {
+  const userId = User.findById(id);
+  try {
+    if (userId) {
+      //NOTE We clear the resetpassword field before storing the new value
+      userId.resetpassword = '';
+
+      //NOTE Here you generate the password recovery token
+      const token = jwt.sign({ userId: userId._id }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+      userId.resetpassword = token;
+    }
+  } catch (error) {
+    console.error('Error al eliminar el usuario:', error);
+  }
+};
+
+userSchema.statics.deleteUser = async function (userId) {
+  const deletedUser = await User.findByIdAndDelete(userId);
+  try {
+    if (deletedUser) {
+      console.log('Usuario eliminado:', deletedUser);
+    } else {
+      console.log('Usuario no encontrado.');
+    }
+  } catch (error) {
+    console.error('Error al eliminar el usuario:', error);
+  }
 };
 
 /**

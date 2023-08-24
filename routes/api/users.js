@@ -103,4 +103,44 @@ router.post('/recover-password', async (req, res) => {
   }
 });
 
+//DONE Route to delete a user by his id
+/**
+ *  POST /users/deleted-user (body)
+ *  asks for the email locates the user takes out his id and deletes it
+ */
+router.post('/deleted-user', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const userEmail = await User.findByEmail(email);
+    console.log('usuario ', userEmail);
+
+    const userId = userEmail._id;
+    console.log('id de usuario', userId);
+
+    const user = await User.generateToken(userId);
+
+    console.log('id de usuario2', user);
+
+    //NOTE Get user ID from decoded token
+    const resetPassword = user.resetpassword;
+    console.log('token ', resetPassword);
+
+    //NOTE Check if the URL token is valid and decode it
+    const decodedToken = jwt.verify(resetPassword, process.env.JWT_SECRET);
+    console.log('token decodi', decodedToken);
+
+    if (decodedToken === userId) {
+      await User.deleteUser(userId);
+    }
+
+    return res.status(200).json({
+      message: 'Usuario eliminado correctamente.',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Failed to change password.',
+    });
+  }
+});
 module.exports = router;

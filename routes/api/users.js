@@ -111,36 +111,54 @@ router.post('/recover-password', async (req, res) => {
 router.post('/deleted-user', async (req, res) => {
   const { email } = req.body;
   try {
-    const userEmail = await User.findByEmail(email);
-    console.log('usuario ', userEmail);
+    const user = await User.findByEmail(email);
+    console.log('user', user);
 
-    const userId = userEmail._id;
-    console.log('id de usuario', userId);
-
-    const user = await User.generateToken(userId);
-
-    console.log('id de usuario2', user);
-
-    //NOTE Get user ID from decoded token
-    const resetPassword = user.resetpassword;
-    console.log('token ', resetPassword);
-
-    //NOTE Check if the URL token is valid and decode it
-    const decodedToken = jwt.verify(resetPassword, process.env.JWT_SECRET);
-    console.log('token decodi', decodedToken);
-
-    if (decodedToken === userId) {
-      await User.deleteUser(userId);
+    if (!user) {
+      return res.status(400).json({
+        error: 'Usuario no encontrado.',
+      });
     }
 
-    return res.status(200).json({
-      message: 'Usuario eliminado correctamente.',
-    });
+    // Generar el token utilizando tu función existente
+    await User.generateToken(user._id);
+
+    // Obtener el usuario actualizado con el nuevo token
+    const userWithToken = await User.findById(user._id);
+    console.log('userWithToken', userWithToken);
+
+    try {
+      // Verificar el token
+      const decodedToken = jwt.verify(
+        userWithToken.resetpassword,
+        process.env.JWT_SECRET,
+      );
+      console.log('decode token', decodedToken);
+
+      if (decodedToken.userId === user._id.toString()) {
+        console.log('decode tokenid1', decodedToken.userId);
+        console.log('decode tokenid2', user._id);
+        await User.deleteUser(user._id);
+        return res.status(200).json({
+          message: 'Usuario eliminado correctamente.',
+        });
+      } else {
+        return res.status(400).json({
+          error: 'Token inválido para este usuario.',
+        });
+      }
+    } catch (tokenError) {
+      console.error('Error al verificar el token:', tokenError);
+      return res.status(400).json({
+        error: 'Token inválido.',
+      });
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: 'Failed to change password.',
+      error: 'Failed to delete user.',
     });
   }
 });
+
 module.exports = router;

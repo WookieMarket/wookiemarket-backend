@@ -41,21 +41,23 @@ userSchema.statics.findUserById = function (userId) {
   return query;
 };
 
-userSchema.statics.generateToken = function (id) {
-  const userId = User.findById(id);
+userSchema.statics.generateToken = async function (id) {
   try {
-    if (userId) {
+    const user = await User.findById(id);
+
+    if (user) {
       //NOTE We clear the resetpassword field before storing the new value
-      userId.resetpassword = '';
+      user.resetpassword = '';
 
       //NOTE Here you generate the password recovery token
-      const token = jwt.sign({ userId: userId._id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
-      userId.resetpassword = token;
+      user.resetpassword = token;
+      await user.save();
     }
   } catch (error) {
-    console.error('Error al eliminar el usuario:', error);
+    console.error('Error al generar el token:', error);
   }
 };
 

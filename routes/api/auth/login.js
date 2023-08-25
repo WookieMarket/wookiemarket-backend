@@ -23,7 +23,7 @@ router.post('/', async (req, res, next) => {
     }
 
     //NOTE If it exists and the password matches
-    const tokenApi = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    const tokenApi = jwt.sign({ _id: user._id, username: user.username}, process.env.JWT_SECRET, {
       expiresIn: '2d',
     });
 

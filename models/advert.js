@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 // Create Schema Adverts
-
 const advertSchema = mongoose.Schema({
   name: { type: String, index: true },
   onSale: { type: Boolean, index: true },
@@ -32,9 +31,6 @@ advertSchema.statics.distinctCategories = function () {
   return query.exec();
 };
 
-//Create model
-
+// Create & exports model
 const Advert = mongoose.model('Advert', advertSchema);
-
-// Export model
 module.exports = Advert;

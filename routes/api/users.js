@@ -7,7 +7,6 @@ const {
   resetPassword,
 } = require('../../lib/microServiceEmailConfig');
 
-//DONE returns all users
 /**
  *  GET /users
  *  returns all users
@@ -23,7 +22,6 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-//DONE returns the user searched for by email
 /**
  *  GET /users/email (body)
  *  returns the user searched for by email
@@ -39,7 +37,6 @@ router.get('/email/:email', async (req, res, next) => {
   }
 });
 
-//DONE Route to send a password recovery email
 /**
  *  POST /users/email-password (body)
  *  returns an email with a url that has the resetpassword token and the user's email
@@ -61,7 +58,6 @@ router.post('/email-password', async (req, res) => {
   }
 });
 
-//DONE Route to request password recovery
 /**
  *  POST /users/recover-password (body)
  *  if the url token and the token inside resetpassword match, the password is changed
@@ -70,22 +66,22 @@ router.post('/recover-password', async (req, res) => {
   const { email, token, newPassword } = req.body;
 
   try {
-    //NOTE Check if the URL token is valid and decode it
+    // Checks if the URL token is valid and decode it
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    //NOTE Get user ID from decoded token
+    // Gets user ID from decoded token
     const userId = decodedToken.userId;
 
     console.log('token decodi', decodedToken);
 
-    //NOTE Get user from database using user id
+    // Gets user from database using user id
     const user = await User.findUserById(userId);
     console.log('usuario', user);
 
-    //NOTE Check if the token stored in the database matches the token in the URL
+    // Checks if the token stored in the database matches the token in the URL
     if (user && user.resetpassword === token) {
-      //NOTE If the token matches, proceed to change the password
-      await User.resetPassword(email, token, newPassword);
+      // If the token matches, proceed to change the password
+      await resetPassword(email, token, newPassword);
 
       return res.status(200).json({
         message: 'Password changed successfully',

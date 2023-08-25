@@ -7,12 +7,11 @@ var logger = require('morgan');
 require('./lib/connectMongoose');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
 var app = express();
 const cors = require('cors');
 
-//NOTE Configure CORS options to allow requests from localhost:3000
+// Configure CORS options to allow requests from localhost:3000
 const corsOptions = {
   origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200, // Some older browsers (IE11, various SmartTVs) will interpret 204 as 'no content'
@@ -31,13 +30,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const bodyParser = require('body-parser');
-
 app.use(bodyParser.urlencoded({ extended: false }));
 
 /**
  * API routes
  */
-//app.post("/api/login", loginControllerApi.authApi);
 app.use(
   '/api/auth/signup',
   require('./routes/api/auth/signup'),
@@ -48,7 +45,6 @@ app.use('/api/users', require('./routes/api/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -86,10 +82,5 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.render('error');
 });
-
-// const port = 3001;
-// app.listen(port, () => {
-//   console.log(`Servidor backend funcionando en http://localhost:${port}`);
-// });
 
 module.exports = app;

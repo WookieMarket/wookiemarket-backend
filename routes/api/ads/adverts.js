@@ -48,7 +48,6 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-
 //DONE I create an ad
 /**
  *  POST api/ads/adverts/create (body)
@@ -104,5 +103,18 @@ router.post(
     }
   },
 );
+
+router.delete('/:id', async (req, res) => {
+  try {
+    
+    const id = req.params.id;
+        await Advert.findByIdAndDelete(id);
+
+    // Sends a response to the client indicating that the advertisement was successfully removed.
+    res.status(200).send({ message: 'Advert deleted successfully' });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
 
 module.exports = router;

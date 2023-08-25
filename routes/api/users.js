@@ -6,6 +6,7 @@ const {
   microEmailService,
   resetPassword,
 } = require('../../lib/microServiceEmailConfig');
+const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
 
 //DONE returns all users
 /**
@@ -85,7 +86,7 @@ router.post('/recover-password', async (req, res) => {
     //NOTE Check if the token stored in the database matches the token in the URL
     if (user && user.resetpassword === token) {
       //NOTE If the token matches, proceed to change the password
-      await User.resetPassword(email, token, newPassword);
+      await resetPassword(email, token, newPassword);
 
       return res.status(200).json({
         message: 'Password changed successfully',
@@ -108,49 +109,56 @@ router.post('/recover-password', async (req, res) => {
  *  POST /users/deleted-user (body)
  *  asks for the email locates the user takes out his id and deletes it
  */
-router.post('/deleted-user', async (req, res) => {
+router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await User.findByEmail(email);
-    console.log('user', user);
+    //NOTE I get the authenticated user from the req.user object
+    const authenticatedUser = req.user;
 
-    if (!user) {
+    //NOTE I look for the user by the email provided
+    const userToDelete = await User.findByEmail(email);
+
+    if (!userToDelete) {
       return res.status(400).json({
         error: 'Usuario no encontrado.',
       });
     }
 
-    // Generar el token utilizando tu función existente
-    await User.generateToken(user._id);
+    //NOTE I check if the authenticated user matches the user to delete
+    if (authenticatedUser.id.toString() !== userToDelete._id.toString()) {
+      return res.status(403).json({
+        error: 'You do not have permissions to delete this user.',
+      });
+    }
 
-    // Obtener el usuario actualizado con el nuevo token
-    const userWithToken = await User.findById(user._id);
-    console.log('userWithToken', userWithToken);
+    //NOTE Generate the token using generateToken
+    await User.generateToken(userToDelete._id);
+
+    //NOTE Get the updated user with the new token
+    const userWithToken = await User.findById(userToDelete._id);
 
     try {
-      // Verificar el token
+      //NOTE Check the token in resetpassword
       const decodedToken = jwt.verify(
         userWithToken.resetpassword,
         process.env.JWT_SECRET,
       );
-      console.log('decode token', decodedToken);
 
-      if (decodedToken.userId === user._id.toString()) {
-        console.log('decode tokenid1', decodedToken.userId);
-        console.log('decode tokenid2', user._id);
-        await User.deleteUser(user._id);
+      //NOTE if the id of the token in resetpassword matches the id of the user's token I delete it
+      if (decodedToken.userId === userWithToken._id.toString()) {
+        await User.deleteUser(userWithToken._id);
         return res.status(200).json({
-          message: 'Usuario eliminado correctamente.',
+          message: 'User deleted successfully.',
         });
       } else {
         return res.status(400).json({
-          error: 'Token inválido para este usuario.',
+          error: 'Invalid token for this user.',
         });
       }
     } catch (tokenError) {
-      console.error('Error al verificar el token:', tokenError);
+      console.error('Failed to verify token:', tokenError);
       return res.status(400).json({
-        error: 'Token inválido.',
+        error: 'Invalid Token.',
       });
     }
   } catch (error) {

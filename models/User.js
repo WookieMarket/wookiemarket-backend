@@ -29,18 +29,31 @@ userSchema.methods.comparePassword = function (rawPassword) {
   return bcrypt.compare(rawPassword, this.password);
 };
 
-//DONE Define the static method to search for users by their email
+/**
+ * method to search for a user by his email
+ *
+ * @param {email} email
+ */
 userSchema.statics.findByEmail = function (email) {
   const query = User.findOne({ email: email });
   return query;
 };
 
-//DONE Define the static method to look up a user by their ID
+/**
+ * method to search for a user by his id
+ *
+ * @param {userId} userId
+ */
 userSchema.statics.findUserById = function (userId) {
   const query = User.findById(userId);
   return query;
 };
 
+/**
+ * generate a token with the user's id and put it in resetpassword
+ *
+ * @param {id} id
+ */
 userSchema.statics.generateToken = async function (id) {
   try {
     const user = await User.findById(id);
@@ -61,53 +74,21 @@ userSchema.statics.generateToken = async function (id) {
   }
 };
 
+/**
+ * method that looks for ey deletes a user by his id
+ *
+ * @param {userId} userId
+ */
 userSchema.statics.deleteUser = async function (userId) {
   const deletedUser = await User.findByIdAndDelete(userId);
   try {
     if (deletedUser) {
-      console.log('Usuario eliminado:', deletedUser);
+      console.log('User Deleted:', deletedUser);
     } else {
-      console.log('Usuario no encontrado.');
+      console.log('User not found.');
     }
   } catch (error) {
-    console.error('Error al eliminar el usuario:', error);
-  }
-};
-
-/**
- * This reset user password
- *
- * @param {*} email
- * @param {*} token
- * @param {*} newPassword
- * @returns message of password was succesfully reset or throws error if it fails
- */
-userSchema.statics.resetPassword = async function (email, token, newPassword) {
-  try {
-    // Search for the user in the database by their email
-    const user = await this.findOne({ email: email, resetpassword: token });
-
-    //NOTE If the user is not found or the token does not match, return an error
-    if (!user) {
-      throw new Error('Invalid recovery token or user not found');
-    }
-
-    //NOTE Encrypt the new password using the hashPassword function
-    const hashedPassword = await this.hashPassword(newPassword);
-
-    //NOTE Update the user's password with the new encrypted password
-    user.password = hashedPassword;
-
-    //NOTE Delete the recovery token after it has been used
-    user.resetpassword = '';
-
-    await user.save();
-
-    //NOTE Reply with a success message
-    return { message: 'Password changed successfully' };
-  } catch (error) {
-    console.error(error);
-    throw new Error('Failed to change password.');
+    console.error('Error deleting user:', error);
   }
 };
 

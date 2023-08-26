@@ -6,6 +6,7 @@ const {
   microEmailService,
   resetPassword,
 } = require('../../lib/microServiceEmailConfig');
+const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
 
 /**
  *  GET /users
@@ -95,6 +96,71 @@ router.post('/recover-password', async (req, res) => {
     console.error(error);
     return res.status(500).json({
       error: 'Failed to change password.',
+    });
+  }
+});
+
+//DONE Route to delete a user by his id
+/**
+ *  POST /users/deleted-user (body)
+ *  asks for the email locates the user takes out his id and deletes it
+ */
+router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
+  const { email } = req.body;
+  try {
+    //NOTE I get the authenticated user from the req.user object
+    const authenticatedUser = req.user;
+
+    //NOTE I look for the user by the email provided
+    const userToDelete = await User.findByEmail(email);
+
+    if (!userToDelete) {
+      return res.status(400).json({
+        error: 'Usuario no encontrado.',
+      });
+    }
+
+    //NOTE I check if the authenticated user matches the user to delete
+    if (authenticatedUser.id.toString() !== userToDelete._id.toString()) {
+      return res.status(403).json({
+        error: 'You do not have permissions to delete this user.',
+      });
+    }
+
+    //NOTE Generate the token using generateToken
+    await User.generateToken(userToDelete._id);
+
+    //NOTE Get the updated user with the new token
+    const userWithToken = await User.findById(userToDelete._id);
+
+    try {
+      //NOTE Check the token in resetpassword
+      const decodedToken = jwt.verify(
+        userWithToken.resetpassword,
+        process.env.JWT_SECRET,
+      );
+
+      //NOTE if the id of the token in resetpassword matches the id of the user's token I delete it
+      if (decodedToken.userId === userWithToken._id.toString()) {
+        await User.deleteUser(userWithToken._id);
+        return res.status(200).json({
+          message: 'User deleted successfully.',
+        });
+      } else {
+        return res.status(400).json({
+          error: 'Invalid token for this user.',
+        });
+      }
+    } catch (tokenError) {
+      console.error('Failed to verify token:', tokenError);
+      return res.status(400).json({
+        error: 'Invalid Token.',
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Failed to delete user.',
     });
   }
 });

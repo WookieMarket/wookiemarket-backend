@@ -12,6 +12,7 @@ const advertSchema = mongoose.Schema({
   coin: { type: String, default: '€', index: true },
   createdAt: { type: String, index: true },
   username: { type: String, index: true },
+  userId: { type: String, index: true },
 });
 
 // Static methods filter adverts
@@ -29,6 +30,11 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
 advertSchema.statics.distinctCategories = function () {
   const query = Advert.distinct('category');
   return query.exec();
+};
+
+advertSchema.statics.updateAd = function (adId) {
+  const adNew = Advert.findById(adId);
+  return adNew.exec();
 };
 
 // Create & exports model

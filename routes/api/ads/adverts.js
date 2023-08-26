@@ -79,6 +79,7 @@ router.post(
       adData.createdAt = new Date();
 
       adData.username = user.username;
+      adData.userId = userId;
 
       // Creates an instance of Agent in memory
       const ad = new Advert(adData);
@@ -90,6 +91,56 @@ router.post(
       console.log(
         `Successfully created ad with id ${saveAd.id} and name ${saveAd.name}`,
       );
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+/**
+ *  modify an ad
+ *
+ *  PUT api/ads/adverts/update/id (body)
+ *  modify an ad if it belongs to the user
+ */
+router.put(
+  '/update/:id',
+  jwtAuthApiMiddlewar,
+  upload.single('image'),
+  async (req, res, next) => {
+    try {
+      const adId = req.params.id;
+      const userId = req.user.id;
+      const updatedData = req.body;
+
+      //Search for the ad by its ID and owner
+      const advert = await Advert.findById(adId);
+
+      if (!advert) {
+        return res.status(404).json({ error: 'ad not found' });
+      }
+
+      // Verify if the ad belongs to the user
+      if (advert.userId !== userId) {
+        return res
+          .status(403)
+          .json({ error: 'You do not have permissions to update this ad' });
+      }
+
+      // Handle image update
+      if (req.file) {
+        const imageFilename = req.file.filename;
+        const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+        updatedData.image = imageUrl;
+      }
+
+      // Merge updated data into the existing ad
+      Object.assign(advert, updatedData);
+
+      // Save the updated ad
+      const updatedAd = await advert.save();
+
+      res.json({ result: updatedAd });
     } catch (error) {
       next(error);
     }

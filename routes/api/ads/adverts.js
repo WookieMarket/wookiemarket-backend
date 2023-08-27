@@ -147,4 +147,21 @@ router.put(
   },
 );
 
+router.get('/find/:id', async (req, res, next) => {
+  try {
+    const adId = req.params.id;
+
+    //Search for the ad by its ID and owner
+    const advert = await Advert.findById(adId);
+
+    if (!advert) {
+      return res.status(404).json({ error: 'ad not found' });
+    }
+
+    res.json({ result: advert });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

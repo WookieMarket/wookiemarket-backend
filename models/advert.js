@@ -31,6 +31,14 @@ advertSchema.statics.distinctCategories = function () {
   return query.exec();
 };
 
-// Create & exports model
+//Find an advert by id
+advertSchema.statics.findById = async function (id) {
+  return await this.findOne({ _id: id });
+};
+
+//Create model
+
 const Advert = mongoose.model('Advert', advertSchema);
+
+// Export model
 module.exports = Advert;

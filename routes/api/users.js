@@ -39,6 +39,20 @@ router.get('/email/:email', async (req, res, next) => {
   }
 });
 
+/**
+ *  GET /users/id (body)
+ *  returns the user searched for by id
+ */
+router.get('/id/:id', async (req, res, next) => {
+  try {
+    let id = req.params.id;
+    emailUser = await User.findUserById(id);
+
+    res.json({ results: emailUser });
+  } catch (error) {
+    next(error);
+  }
+});
 //DONE Route to send a password recovery email
 /**
  *  POST /users/email-password (body)

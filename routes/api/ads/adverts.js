@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Advert, User } = require('../../../models');
 const upload = require('../../../lib/uploadConfigure');
-const jwtAuthApiMiddlewar = require('../../../lib/jwtAuthApiMiddleware');
+const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 
 /**
  *  Returns all ads
@@ -106,7 +106,7 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post(
   '/create',
-  jwtAuthApiMiddlewar,
+  jwtAuthApiMiddleware,
   upload.single('image'),
   async (req, res, next) => {
     try {

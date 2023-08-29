@@ -5,3 +5,8 @@ node_modules
 .DS_Store
 .env.local
 .env
+.env.development
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov

@@ -7,6 +7,8 @@ var logger = require('morgan');
 require('./lib/connectMongoose');
 
 var indexRouter = require('./routes/index');
+var signupRouter = require('./routes/api/auth/signup');
+var loginRouter = require('./routes/api/auth/login');
 
 var app = express();
 const cors = require('cors');
@@ -22,8 +24,10 @@ const corsOptions = {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.set('x-powered-by', false);
 
 app.locals.title = 'Wookie Market';
+
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
@@ -37,14 +41,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 /**
  * API routes
  */
-app.use(
-  '/api/auth/signup',
-  require('./routes/api/auth/signup'),
-  require('./routes/api/auth/login'),
-);
-app.use('/api/auth/login', require('./routes/api/auth/login'));
+app.post('/api/auth/signup', signupRouter, loginRouter);
+app.post('/api/auth/login', loginRouter);
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
+
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
 
 app.use('/', indexRouter);
 
@@ -76,10 +81,6 @@ app.use(function (err, req, res, next) {
     res.json({ error: err.message });
     return;
   }
-
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.render('error');

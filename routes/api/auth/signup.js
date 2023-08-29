@@ -10,6 +10,7 @@ const createError = require('http-errors');
  */
 router.post('/', async (req, res, next) => {
   try {
+    console.log('new request');
     // retrieve user data
     const { username, password, email } = req.body;
 

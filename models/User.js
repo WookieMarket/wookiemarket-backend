@@ -34,9 +34,14 @@ userSchema.statics.findByEmail = function (email) {
   return query;
 };
 
+userSchema.statics.findByUsername = function (username) {
+  const query = User.findOne({ username: username });
+  return query;
+};
+
 //DONE Define the static method to look up a user by their ID
 userSchema.statics.findUserById = function (userId) {
-  const query = User.findById(userId);
+  const query = User.findById(userId,{'password':0});
   return query;
 };
 
@@ -76,6 +81,47 @@ userSchema.statics.resetPassword = async function (email, token, newPassword) {
     throw new Error('Failed to change password.');
   }
 };
+
+/**
+ * 
+ * @param {*} data 
+ * @returns 
+ */
+userSchema.statics.updateUserData = async function ( data,id) {
+  try{
+    let {username,email,password,newPassword} = data;
+    let userByUsername = await this.findByUsername(username);
+    let userByEmail = await this.findByEmail(email);
+    let user = await this.findById(id);
+    
+    if(userByUsername  && user.username!=username){
+      throw new Error('User name not available');
+    }else if(userByEmail && user.email!=email){
+      throw new Error('Email not available');
+    }
+    console.log('username:',data);
+    if(username){
+      user.username = username;
+    }
+    if(email){
+      user.email = email;
+    }
+    if(newPassword && await user.comparePassword(password)){
+    const hashedPassword = await this.hashPassword(newPassword);
+    user.password = hashedPassword;
+    }
+    // }else{
+    //   throw new Error('It is not possible to change the password');
+    // }
+    user.save();
+    console.log('Usuario',user);
+    return(user);
+  }catch (error){
+    console.error(error);
+    throw new Error(error.message);
+  }
+}
+
 
 //NOTE create model
 

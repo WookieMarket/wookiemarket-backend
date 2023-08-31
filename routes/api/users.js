@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../../lib/uploadConfigure');
 const { User } = require('../../models');
 const jwt = require('jsonwebtoken');
 const {
@@ -12,7 +13,7 @@ const {
  *  GET /users
  *  returns all users
  */
-router.get('/', async (req, res, next) => {
+router.get('/',async (req, res, next) => {
   try {
     let users = {};
     users = await User.usersAll();
@@ -116,5 +117,28 @@ router.post('/recover-password', async (req, res) => {
     });
   }
 });
+/**
+ * 
+ */
+router.post('/user-info', upload.none(), async (req, res) => {
+  let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
+  token = token.replace('Bearer ', '');
 
+  const data = req.body;
+  console.log('data:',data);
+  
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken._id;
+    const user = await User.updateUserData(data,userId);
+  
+    return res.status(200).json(user);
+    
+  } catch (error) {
+    console.log('Error:',error);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+});
 module.exports = router;

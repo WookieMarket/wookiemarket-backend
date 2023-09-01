@@ -27,9 +27,10 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
   return query.exec();
 };
 
-advertSchema.statics.distinctCategories = function () {
-  const query = Advert.distinct('category');
-  return query.exec();
+// Método estático para obtener elementos únicos en la matriz 'category'
+advertSchema.statics.getUniqueCategories = function () {
+  const categories = this.distinct('category');
+  return categories.exec();
 };
 
 //Find an advert by id

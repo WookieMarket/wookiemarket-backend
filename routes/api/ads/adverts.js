@@ -5,12 +5,50 @@ const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddlewar = require('../../../lib/jwtAuthApiMiddleware');
 
 /**
- *  Returns a list of ads
+ *  Returns all ads
  *
  *  GET api/ads/adverts
- *  Returns a list of ads
+ *  Returns all ads
  */
 router.get('/', async (req, res, next) => {
+  try {
+    let categories = {};
+    categories = await Advert.find();
+    res.json({ result: categories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Returns a list of unique categories
+ *
+ * GET api/ads/adverts/categories
+ * Returns a list of unique categories
+ */
+router.get('/categories', async (req, res, next) => {
+  try {
+    const getAllCategories = req.query.categories === 'true';
+
+    let completeCategories = [];
+
+    if (getAllCategories) {
+      completeCategories = await Advert.getUniqueCategories();
+    }
+
+    res.json({ results: completeCategories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ *  Returns a list of ads
+ *
+ *  GET api/ads/adverts/filter
+ *  Returns a list of ads
+ */
+router.get('/filter', async (req, res, next) => {
   try {
     // Order
     const sort = req.query.sort;
@@ -24,10 +62,19 @@ router.get('/', async (req, res, next) => {
 
     // Filters
     const filterByName = req.query.name;
+    const filterByCategory = req.query.category;
+
     const filter = {};
     if (filterByName) {
       // Option i, ignores uppercase and allows search by words
       filter.name = { $regex: filterByName, $options: 'i' };
+    }
+
+    if (filterByCategory) {
+      const categories = filterByCategory
+        .split(',')
+        .map(category => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
+      filter.category = { $all: categories };
     }
 
     // TODO añadir resto de campos de filtardo

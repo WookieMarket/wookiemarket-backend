@@ -14,6 +14,8 @@ const cors = require('cors');
 // Configure CORS options to allow requests from localhost:3000
 const corsOptions = {
   origin: process.env.CORS_ORIGIN,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200, // Some older browsers (IE11, various SmartTVs) will interpret 204 as 'no content'
 };
 

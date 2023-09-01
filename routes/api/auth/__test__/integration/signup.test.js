@@ -1,6 +1,6 @@
-require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
-const mongoose = require('../../../../../lib/connectMongoose');
+require('dotenv').config({ path: `.env.test` });
 const request = require('supertest');
+const mongoose = require('../../../../../lib/connectMongoose');
 const app = require('../../../../../app.js');
 const {
   serviceOffline,
@@ -8,61 +8,84 @@ const {
 const { User } = require('../../../../../models');
 
 describe('POST /api/auth/signup endpoint', () => {
-  let generatedKey, userData;
+  let existingUser, generatedKey;
 
-  beforeEach(() => {
+  beforeAll(async () => {
+    await User.deleteMany();
     generatedKey = Math.random();
-    userData = {
+    // Add a user
+    const hashedPassword = await User.hashPassword(
+      `${generatedKey}-${generatedKey}`,
+    );
+    existingUser = {
       email: `user${generatedKey}@test.com`,
       username: `user${generatedKey}`,
-      pasword: `${generatedKey}-${generatedKey}`,
+      password: hashedPassword,
+      resetpassword: '',
     };
+    await User.create(existingUser);
   });
 
-  it('Happy case - Successfully create new user and return a JWT', async () => {
+  it('Happy case - Successfully create new user', async () => {
     //post.send.expect.then
-    //expect.assertions(2);
-    console.log(userData);
-    const response = await request(app).post('/api/auth/signup').send(userData);
+    const response = await request(app)
+      .post('/api/auth/signup')
+      .send({
+        email: `newUser${generatedKey}@somecompany.com`,
+        username: `newUser${generatedKey}`,
+        password: `newPassword123`,
+      });
 
     // Check the response
-    //console.log(response);
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('jwt');
+    console.log(response.body);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('result');
+    expect(response.body.result).toBe(
+      `New account created. Username: newUser${generatedKey}`,
+    );
 
     // Check the data in the database
-    const newUser = await User.findOne({ username: userData.username });
+    const newUser = await User.findOne({ username: `newUser${generatedKey}` });
     expect(newUser).toBeDefined();
   });
 
-  it('Unhappy case - Throws error when trying to register an existing username', async () => {
-    let data = {
-      username: `userXYZ`,
-      email: `user${generatedKey}@test.com`,
-      pasword: `${generatedKey}-${generatedKey}`,
-    };
-    // create user
-    await request(app).post('/api/auth/signup').send(userData);
-    // create a second user with the same email
-    const response = await request(app).post('/api/auth/signup').send(data);
-    expect(response.body).toHaveProperty('error');
-  });
-
   it('Unhappy case - Throws error when trying to register an existing email', async () => {
-    let data = {
-      username: `user${generatedKey}`,
-      email: `userXYZ@test.com`,
-      pasword: `${generatedKey}-${generatedKey}`,
-    };
-    // create user
-    await request(app).post('/api/auth/signup').send(data);
+    // set the existing with an existing email and new username
+    existingUser.username = `newUserTest`;
+    existingUser.email = `newUser${generatedKey}@somecompany.com`;
 
-    // create a second user with the same username
-    const response = await request(app).post('/api/auth/signup').send(data);
+    const response = await request(app)
+      .post('/api/auth/signup')
+      .send(existingUser);
+
+    // Check the response
+    console.log(response.body);
+    expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty('error');
+    expect(response.body.error).toBe(
+      `Email: ${existingUser.email} is already registered!`,
+    );
   });
 
-  /* Closing database connection after each test. */
+  it('Unhappy case - Throws error when trying to register an existing username', async () => {
+    // set the existing with an existing username and new emailuser
+    existingUser.username = `newUser${generatedKey}`;
+    existingUser.email = `newUserTest@somecompany.com`;
+
+    const response = await request(app)
+      .post('/api/auth/signup')
+      .send(existingUser);
+
+    // Check the response
+    console.log(response.body);
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('error');
+    expect(response.body.error).toBe(
+      `Username: ${existingUser.username} is already taken!`,
+    );
+  });
+
+  // Closing database connection after each test.
   afterAll(async () => {
     await mongoose.close();
     serviceOffline();

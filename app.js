@@ -7,8 +7,6 @@ var logger = require('morgan');
 require('./lib/connectMongoose');
 
 var indexRouter = require('./routes/index');
-var signupRouter = require('./routes/api/auth/signup');
-var loginRouter = require('./routes/api/auth/login');
 
 var app = express();
 const cors = require('cors');
@@ -41,8 +39,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 /**
  * API routes
  */
-app.post('/api/auth/signup', signupRouter, loginRouter);
-app.post('/api/auth/login', loginRouter);
+app.use('/api/auth/signup', require('./routes/api/auth/signup'));
+app.use('/api/auth/login', require('./routes/api/auth/login'));
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
 

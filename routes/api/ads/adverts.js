@@ -5,12 +5,50 @@ const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddlewar = require('../../../lib/jwtAuthApiMiddleware');
 
 /**
- *  Returns a list of ads
+ *  Returns all ads
  *
  *  GET api/ads/adverts
- *  Returns a list of ads
+ *  Returns all ads
  */
 router.get('/', async (req, res, next) => {
+  try {
+    let categories = {};
+    categories = await Advert.find();
+    res.json({ result: categories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * Returns a list of unique categories
+ *
+ * GET api/ads/adverts/categories
+ * Returns a list of unique categories
+ */
+router.get('/categories', async (req, res, next) => {
+  try {
+    const getAllCategories = req.query.categories === 'true';
+
+    let completeCategories = [];
+
+    if (getAllCategories) {
+      completeCategories = await Advert.getUniqueCategories();
+    }
+
+    res.json({ results: completeCategories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ *  Returns a list of ads
+ *
+ *  GET api/ads/adverts/filter
+ *  Returns a list of ads
+ */
+router.get('/filter', async (req, res, next) => {
   try {
     // Order
     const sort = req.query.sort;
@@ -24,10 +62,19 @@ router.get('/', async (req, res, next) => {
 
     // Filters
     const filterByName = req.query.name;
+    const filterByCategory = req.query.category;
+
     const filter = {};
     if (filterByName) {
       // Option i, ignores uppercase and allows search by words
       filter.name = { $regex: filterByName, $options: 'i' };
+    }
+
+    if (filterByCategory) {
+      const categories = filterByCategory
+        .split(',')
+        .map(category => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
+      filter.category = { $all: categories };
     }
 
     // TODO añadir resto de campos de filtardo
@@ -91,6 +138,7 @@ router.post(
       adData.createdAt = new Date();
 
       adData.username = user.username;
+      adData.userId = userId;
 
       // Creates an instance of Agent in memory
       const ad = new Advert(adData);
@@ -107,5 +155,72 @@ router.post(
     }
   },
 );
+
+/**
+ *  modify an ad
+ *
+ *  PUT api/ads/adverts/update/id (body)
+ *  modify an ad if it belongs to the user
+ */
+router.put(
+  '/update/:id',
+  jwtAuthApiMiddlewar,
+  upload.single('image'),
+  async (req, res, next) => {
+    try {
+      const adId = req.params.id;
+      const userId = req.user.id;
+      const updatedData = req.body;
+
+      //Search for the ad by its ID and owner
+      const advert = await Advert.findById(adId);
+
+      if (!advert) {
+        return res.status(404).json({ error: 'ad not found' });
+      }
+
+      // Verify if the ad belongs to the user
+      if (advert.userId !== userId) {
+        return res
+          .status(403)
+          .json({ error: 'You do not have permissions to update this ad' });
+      }
+
+      // Handle image update
+      if (req.file) {
+        const imageFilename = req.file.filename;
+        const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+        updatedData.image = imageUrl;
+      }
+
+      // Merge updated data into the existing ad
+      Object.assign(advert, updatedData);
+
+      // Save the updated ad
+      const updatedAd = await advert.save();
+
+      res.json({ result: updatedAd });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get('/find/:id', async (req, res, next) => {
+  try {
+    const adId = req.params.id;
+
+    //Search for the ad by its ID and owner
+    const advert = await Advert.findById(adId);
+
+    if (!advert) {
+      return res.status(404).json({ error: 'ad not found' });
+    }
+
+    res.json({ result: advert });
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

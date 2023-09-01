@@ -12,6 +12,7 @@ const advertSchema = mongoose.Schema({
   coin: { type: String, default: '€', index: true },
   createdAt: { type: String, index: true },
   username: { type: String, index: true },
+  userId: { type: String, index: true },
 });
 
 // Static methods filter adverts
@@ -26,9 +27,10 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
   return query.exec();
 };
 
-advertSchema.statics.distinctCategories = function () {
-  const query = Advert.distinct('category');
-  return query.exec();
+// Método estático para obtener elementos únicos en la matriz 'category'
+advertSchema.statics.getUniqueCategories = function () {
+  const categories = this.distinct('category');
+  return categories.exec();
 };
 
 //Find an advert by id
@@ -36,8 +38,12 @@ advertSchema.statics.findById = async function (id) {
   return await this.findOne({ _id: id });
 };
 
-//Create model
+advertSchema.statics.updateAd = function (adId) {
+  const adNew = Advert.findById(adId);
+  return adNew.exec();
+};
 
+// Create & exports model
 const Advert = mongoose.model('Advert', advertSchema);
 
 // Export model

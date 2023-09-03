@@ -86,7 +86,13 @@ router.get('/filter', async (req, res, next) => {
   }
 });
 
-//return an advert by Id
+//
+/**
+ * Returns an advert by Id
+ *
+ *  GET api/ads/adverts/:id
+ *  Returns an ad if found
+ */
 router.get('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -97,7 +103,6 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-//DONE I create an ad
 /**
  *  Creates an ad
  *
@@ -210,7 +215,7 @@ router.get('/find/:id', async (req, res, next) => {
   try {
     const adId = req.params.id;
 
-    //Search for the ad by its ID and owner
+    // Search for the ad by its ID and owner
     const advert = await Advert.findById(adId);
 
     if (!advert) {

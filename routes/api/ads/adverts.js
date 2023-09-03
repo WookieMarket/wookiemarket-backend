@@ -169,7 +169,7 @@ router.post(
  */
 router.put(
   '/update/:id',
-  jwtAuthApiMiddlewar,
+  jwtAuthApiMiddleware,
   upload.single('image'),
   async (req, res, next) => {
     try {
@@ -177,7 +177,7 @@ router.put(
       const userId = req.user.id;
       const updatedData = req.body;
 
-      //Search for the ad by its ID and owner
+      // Search for the ad by its ID and owner
       const advert = await Advert.findById(adId);
 
       if (!advert) {

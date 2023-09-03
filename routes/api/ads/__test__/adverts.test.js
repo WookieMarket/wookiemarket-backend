@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const Advert = require('../../../../models/Advert');
+const Advert = require('../../../../models/advert');
 
 describe('My API', () => {
   const id = '1';

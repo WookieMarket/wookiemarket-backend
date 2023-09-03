@@ -3,5 +3,9 @@ node_modules
 
 # misc
 .DS_Store
-.env.local
 .env
+.env.test
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov

@@ -17,24 +17,22 @@ router.post('/', async (req, res, next) => {
     const hashedPassword = await User.hashPassword(password);
     const addedUser = await User.create({
       email,
-      password: hashedPassword,
       username,
+      password: hashedPassword,
       resetpassword: '',
     });
-    console.log(`New account created.'${addedUser}`);
-
-    // Trigger login, in order to auth and returns a JWT token
-    next();
+    //console.log(`New account created.'${addedUser}`);
+    res.json({ result: `New account created. Username: ${username}` });
   } catch (err) {
+    const { username, email } = req.body;
     if (err.code == 11000) {
-      let m = '';
+      let message;
       if (err.keyValue.username) {
-        message = `Username: ${err.keyValue.username} is already taken!`;
+        message = `Username: ${username} is already taken!`;
       } else if (err.keyValue.email) {
-        message = `Email: ${err.keyValue.email} is already registered!`;
+        message = `Email: ${email} is already registered!`;
       }
-      const error = createError(400, message);
-      next(error);
+      next(createError(400, message));
     } else {
       next(err);
     }

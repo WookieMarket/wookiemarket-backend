@@ -125,21 +125,17 @@ userSchema.statics.updateUserData = async function ( data,id) {
     if(newPassword && await user.comparePassword(password)){
     const hashedPassword = await this.hashPassword(newPassword);
     user.password = hashedPassword;
-
-    //NOTE Delete the recovery token after it has been used
-    user.resetpassword = '';
-
-      //NOTE Here you generate the password recovery token
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-      });
-      user.resetpassword = token;
-      await user.save();
     }
-  } catch (error) {
-    console.error('Error al generar el token:', error);
+    // }else{
+    //   throw new Error('It is not possible to change the password');
+    // }
+    user.save();
+    return(user);
+  }catch (error){
+    console.error(error);
+    throw new Error(error.message);
   }
-};
+}
 
 /**
  * method that looks for ey deletes a user by his id

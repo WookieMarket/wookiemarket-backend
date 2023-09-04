@@ -35,13 +35,23 @@ userSchema.statics.findByEmail = function (email) {
   return query;
 };
 
+userSchema.statics.findByUsername = function (username) {
+  const query = User.findOne({ username: username });
+  return query;
+};
+
+userSchema.statics.findByUsername = function (username) {
+  const query = User.findOne({ username: username });
+  return query;
+};
+
 /**
  * method to search for a user by his id
  *
  * @param {userId} userId
  */
 userSchema.statics.findUserById = function (userId) {
-  const query = User.findById(userId);
+  const query = User.findById(userId,{'password':0});
   return query;
 };
 
@@ -87,6 +97,65 @@ userSchema.statics.deleteUser = async function (userId) {
     console.error('Error deleting user:', error);
   }
 };
+
+/**
+ * 
+ * @param {*} data 
+ * @returns 
+ */
+userSchema.statics.updateUserData = async function ( data,id) {
+  try{
+    let {username,email,password,newPassword} = data;
+    let userByUsername = await this.findByUsername(username);
+    let userByEmail = await this.findByEmail(email);
+    let user = await this.findById(id);
+    
+    if(userByUsername  && user.username!=username){
+      throw new Error('User name not available');
+    }else if(userByEmail && user.email!=email){
+      throw new Error('Email not available');
+    }
+    console.log('username:',data);
+    if(username){
+      user.username = username;
+    }
+    if(email){
+      user.email = email;
+    }
+    if(newPassword && await user.comparePassword(password)){
+    const hashedPassword = await this.hashPassword(newPassword);
+    user.password = hashedPassword;
+    }
+    // }else{
+    //   throw new Error('It is not possible to change the password');
+    // }
+    user.save();
+    return(user);
+  }catch (error){
+    console.error(error);
+    throw new Error(error.message);
+  }
+}
+
+/**
+ * method that looks for ey deletes a user by his id
+ *
+ * @param {userId} userId
+ */
+userSchema.statics.deleteUser = async function (userId) {
+  const deletedUser = await User.findByIdAndDelete(userId);
+  try {
+    if (deletedUser) {
+      console.log('User Deleted:', deletedUser);
+    } else {
+      console.log('User not found.');
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.message);
+  }
+}
+
 
 //NOTE create model
 

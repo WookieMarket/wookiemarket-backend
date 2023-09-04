@@ -16,6 +16,7 @@ const corsOptions = {
   origin: process.env.CORS_ORIGIN,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
   optionsSuccessStatus: 200, // Some older browsers (IE11, various SmartTVs) will interpret 204 as 'no content'
 };
 

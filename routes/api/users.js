@@ -8,7 +8,6 @@ const {
   resetPassword,
 } = require('../../lib/microServiceEmailConfig');
 const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
-const bcrypt = require('bcrypt');
 
 /**
  *  GET /users
@@ -203,7 +202,7 @@ router.post('/user-info', upload.none(), async (req, res) => {
 
     // Verifica si se proporcionó la contraseña actual y si es correcta
     if (data.password) {
-      const passwordMatch = await bcrypt.compare(data.password, user.password);
+      const passwordMatch = await user.comparePassword(data.password);
       if (!passwordMatch) {
         return res.status(400).json({ error: 'Contraseña incorrecta' });
       }
@@ -211,7 +210,7 @@ router.post('/user-info', upload.none(), async (req, res) => {
 
     // Si se proporciona una nueva contraseña, cámbiala
     if (data.newPassword) {
-      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const hashedPassword = await User.hashPassword(data.newPassword);
       user.password = hashedPassword;
     }
 
@@ -237,9 +236,10 @@ router.post('/user-info', upload.none(), async (req, res) => {
  */
 router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {
   try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken._id;
+    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    // const userId = decodedToken._id;
     //const userId = req.user._id;
+    const userId = req.user.id;
     const adId = req.params.adId;
     console.log('userid', userId);
     console.log('id', adId);

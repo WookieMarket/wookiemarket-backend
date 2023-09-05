@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../../lib/uploadConfigure');
-const { User } = require('../../models');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const upload = require('../../../lib/uploadConfigure');
+const { User, Advert } = require('../../../models');
 const {
   microEmailService,
   resetPassword,
-} = require('../../lib/microServiceEmailConfig');
-const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
-const bcrypt = require('bcrypt');
+} = require('../../../lib/microServiceEmailConfig');
+const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 
 /**
  *  GET /users
@@ -41,20 +41,42 @@ router.get('/email/:email', async (req, res, next) => {
 });
 
 /**
- *  GET /users/id (body)
+ *  GET /users/id/:id (params)
  *  returns the user searched for by id
  */
 router.get('/id/:id', async (req, res, next) => {
   try {
     let id = req.params.id;
-    emailUser = await User.findUserById(id);
+    const user = await User.findUserById(id);
 
-    res.json({ results: emailUser });
+    res.json({ results: user });
   } catch (error) {
     next(error);
   }
 });
-//DONE Route to send a password recovery email
+
+/**
+ *  GET /users/:user/ads (params)
+ *  returns list of ads for the given username
+ */
+router.get('/:user/ads', async (req, res, next) => {
+  try {
+    // console.log(req.params);
+    let user = req.params.user;
+    if (!user) {
+      return res.status(400).json({
+        error: "Missing parameter 'user'",
+      });
+    }
+    const filter = { username: user };
+    const ads = await Advert.list(filter);
+    // console.log(ads);
+    res.json({ results: ads });
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
  *  POST /users/email-password (body)
  *  returns an email with a url that has the resetpassword token and the user's email
@@ -79,6 +101,7 @@ router.post('/email-password', async (req, res) => {
 /**
  *  POST /users/recover-password (body)
  *  if the url token and the token inside resetpassword match, the password is changed
+ *  returns {} object message otherwise error
  */
 router.post('/recover-password', async (req, res) => {
   const { email, token, newPassword } = req.body;
@@ -124,10 +147,10 @@ router.post('/recover-password', async (req, res) => {
 router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
   const { email } = req.body;
   try {
-    //NOTE I get the authenticated user from the req.user object
+    // gets the authenticated user from the req.user object
     const authenticatedUser = req.user;
 
-    //NOTE I look for the user by the email provided
+    // finds user by the provided email
     const userToDelete = await User.findByEmail(email);
 
     if (!userToDelete) {
@@ -136,27 +159,27 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
       });
     }
 
-    //NOTE I check if the authenticated user matches the user to delete
+    // checks if the authenticated user matches the user to delete
     if (authenticatedUser.id.toString() !== userToDelete._id.toString()) {
       return res.status(403).json({
         error: 'You do not have permissions to delete this user.',
       });
     }
 
-    //NOTE Generate the token using generateToken
+    // generates the token using generateToken
     await User.generateToken(userToDelete._id);
 
-    //NOTE Get the updated user with the new token
+    // gets the updated user with the new token
     const userWithToken = await User.findById(userToDelete._id);
 
     try {
-      //NOTE Check the token in resetpassword
+      // checks the token in resetpassword
       const decodedToken = jwt.verify(
         userWithToken.resetpassword,
         process.env.JWT_SECRET,
       );
 
-      //NOTE if the id of the token in resetpassword matches the id of the user's token I delete it
+      // if the id of the token in resetpassword matches the id of the user's token I delete it
       if (decodedToken.userId === userWithToken._id.toString()) {
         await User.deleteUser(userWithToken._id);
         return res.status(200).json({
@@ -180,8 +203,12 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
     });
   }
 });
+
 /**
+ * POST /users/user-info (body| query)
+ * updates user information
  *
+ * returns updated user object or error
  */
 router.post('/user-info', upload.none(), async (req, res) => {
   let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
@@ -232,7 +259,8 @@ router.post('/user-info', upload.none(), async (req, res) => {
 });
 
 /**
- *  POST /
+ *  POST /favorites/:adId (params)
+ *  Ads a given ad into the current user favorite list
  *
  */
 router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {

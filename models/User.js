@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
   username: { type: String, unique: true },
   password: String,
   resetpassword: String,
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Advert' }],
 });
 
 userSchema.statics.usersAll = function () {
@@ -51,7 +52,7 @@ userSchema.statics.findByUsername = function (username) {
  * @param {userId} userId
  */
 userSchema.statics.findUserById = function (userId) {
-  const query = User.findById(userId,{'password':0});
+  const query = User.findById(userId, { password: 0 });
   return query;
 };
 
@@ -99,43 +100,43 @@ userSchema.statics.deleteUser = async function (userId) {
 };
 
 /**
- * 
- * @param {*} data 
- * @returns 
+ *
+ * @param {*} data
+ * @returns
  */
-userSchema.statics.updateUserData = async function ( data,id) {
-  try{
-    let {username,email,password,newPassword} = data;
+userSchema.statics.updateUserData = async function (data, id) {
+  try {
+    let { username, email, password, newPassword } = data;
     let userByUsername = await this.findByUsername(username);
     let userByEmail = await this.findByEmail(email);
     let user = await this.findById(id);
-    
-    if(userByUsername  && user.username!=username){
+
+    if (userByUsername && user.username != username) {
       throw new Error('User name not available');
-    }else if(userByEmail && user.email!=email){
+    } else if (userByEmail && user.email != email) {
       throw new Error('Email not available');
     }
-    console.log('username:',data);
-    if(username){
+    console.log('username:', data);
+    if (username) {
       user.username = username;
     }
-    if(email){
+    if (email) {
       user.email = email;
     }
-    if(newPassword && await user.comparePassword(password)){
-    const hashedPassword = await this.hashPassword(newPassword);
-    user.password = hashedPassword;
+    if (newPassword && (await user.comparePassword(password))) {
+      const hashedPassword = await this.hashPassword(newPassword);
+      user.password = hashedPassword;
     }
     // }else{
     //   throw new Error('It is not possible to change the password');
     // }
     user.save();
-    return(user);
-  }catch (error){
+    return user;
+  } catch (error) {
     console.error(error);
     throw new Error(error.message);
   }
-}
+};
 
 /**
  * method that looks for ey deletes a user by his id
@@ -154,8 +155,7 @@ userSchema.statics.deleteUser = async function (userId) {
     console.error(error);
     throw new Error(error.message);
   }
-}
-
+};
 
 //NOTE create model
 

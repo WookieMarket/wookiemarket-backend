@@ -8,12 +8,13 @@ const {
   resetPassword,
 } = require('../../lib/microServiceEmailConfig');
 const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
+const bcrypt = require('bcrypt');
 
 /**
  *  GET /users
  *  returns all users
  */
-router.get('/',async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     let users = {};
     users = await User.usersAll();
@@ -116,7 +117,6 @@ router.post('/recover-password', async (req, res) => {
   }
 });
 
-//DONE Route to delete a user by his id
 /**
  *  POST /users/deleted-user (body)
  *  asks for the email locates the user takes out his id and deletes it
@@ -181,27 +181,95 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
   }
 });
 /**
- * 
+ *
  */
 router.post('/user-info', upload.none(), async (req, res) => {
   let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
   token = token.replace('Bearer ', '');
 
   const data = req.body;
-  console.log('data:',data);
-  
+  console.log('data:', data);
+
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decodedToken._id;
-    const user = await User.updateUserData(data,userId);
-  
+
+    // Obtén el usuario actual
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    // Verifica si se proporcionó la contraseña actual y si es correcta
+    if (data.password) {
+      const passwordMatch = await bcrypt.compare(data.password, user.password);
+      if (!passwordMatch) {
+        return res.status(400).json({ error: 'Contraseña incorrecta' });
+      }
+    }
+
+    // Si se proporciona una nueva contraseña, cámbiala
+    if (data.newPassword) {
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      user.password = hashedPassword;
+    }
+
+    // Actualiza otros datos del usuario según sea necesario
+    user.email = data.email;
+    user.username = data.username;
+
+    // Guarda el usuario actualizado en la base de datos
+    await user.save();
+
     return res.status(200).json(user);
-    
   } catch (error) {
-    console.log('Error:',error);
+    console.log('Error:', error);
     return res.status(500).json({
       error: error.message,
     });
   }
 });
+
+/**
+ *  POST /
+ *
+ */
+router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken._id;
+    //const userId = req.user._id;
+    const adId = req.params.adId;
+    console.log('userid', userId);
+    console.log('id', adId);
+
+    if (!adId) {
+      return res.status(400).json({
+        error: "I can't find the ad id",
+      });
+    }
+    const user = await User.findUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+      });
+    }
+    // Agregar el ID del anuncio a la lista de favoritos del usuario
+    user.favorites.push(adId);
+
+    // Guardar el usuario actualizado en la base de datos
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Ad added to favorites successfully',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+});
+
 module.exports = router;

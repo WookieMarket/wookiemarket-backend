@@ -46,5 +46,96 @@
     "coin": "€",
     "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
     "username": "mando2"
+  },
+  {
+    "name": "Alienigena amigable",
+    "onSale": false,
+    "price": 1000,
+    "image_url": "http://localhost:3001/images/alien.jpg",
+    "category": [
+      "lifestyle"
+    ],
+    "description": "Se necesita domesticado y que hable español",
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
+  },
+  {
+    "name": "Agujero negro",
+    "onSale": true,
+    "price": 2000,
+    "image_url": "http://localhost:3001/images/blackhole.jpg",
+    "category": [
+      "lifestyle",
+      "mobile"
+    ],
+    "description": "Le cabe mucho. Ideal como cartera de mujer.",
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
+  },
+  {
+    "name": "Capa invisible",
+    "onSale": true,
+    "price": 750,
+    "image_url": "http://localhost:3001/images/invisible-cape.jpg",
+    "category": [
+      "lifestyle",
+      "mobile",
+      "work"
+    ],
+    "description": "Perfecta para entrar a sitios sin pagar",
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
+  },
+  {
+    "name": "Ufo Retro",
+    "onSale": true,
+    "price": 2500,
+    "image_url": "http://localhost:3001/images/vintage-ovni.jpg",
+    "category": [
+      "lifestyle",
+      "mobile",
+      "motor"
+    ],
+    "description": "Perfecto para paseos con estilo en la ciudad",
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
+  },
+  {
+    "name": "Maquina del tiempo",
+    "onSale": false,
+    "price": 2000,
+    "image_url": "http://localhost:3001/images/time-machine.jpg",
+    "category": [
+      "mobile",
+      "motor"
+    ],
+    "description": "La busco para viajar al mejor tiempo de la historia",
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
+  },
+  {
+    "name": "Set de varitas magicas",
+    "onSale": false,
+    "price": 500,
+    "description": "La busco con urgencia para dar toques magicos",
+    "image_url": "http://localhost:3001/images/sorcerer-wand.jpg",
+    "category": [
+      "mobile",
+      "motor"
+    ],
+    "status": "false",
+    "coin": "€",
+    "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+    "username": "pepito"
   }
 ]

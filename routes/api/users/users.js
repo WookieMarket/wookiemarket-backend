@@ -81,7 +81,7 @@ router.get('/:user/ads', async (req, res, next) => {
  *  POST /users/email-password (body)
  *  returns an email with a url that has the resetpassword token and the user's email
  */
-router.post('/email-password', async (req, res) => {
+router.post('/email-password', async (req, res, next) => {
   const { to } = req.body;
 
   try {
@@ -91,10 +91,7 @@ router.post('/email-password', async (req, res) => {
       message: 'Password recovery email sent successfully.',
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: 'Error sending password recovery email.',
-    });
+    next(error);
   }
 });
 
@@ -103,7 +100,7 @@ router.post('/email-password', async (req, res) => {
  *  if the url token and the token inside resetpassword match, the password is changed
  *  returns {} object message otherwise error
  */
-router.post('/recover-password', async (req, res) => {
+router.post('/recover-password', async (req, res, next) => {
   const { email, token, newPassword } = req.body;
 
   try {
@@ -133,10 +130,7 @@ router.post('/recover-password', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Failed to change password.',
-    });
+    next(error);
   }
 });
 
@@ -144,7 +138,7 @@ router.post('/recover-password', async (req, res) => {
  *  POST /users/deleted-user (body)
  *  asks for the email locates the user takes out his id and deletes it
  */
-router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
+router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res, next) => {
   const { email } = req.body;
   try {
     // gets the authenticated user from the req.user object
@@ -197,10 +191,7 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Failed to delete user.',
-    });
+    next(error);
   }
 });
 
@@ -210,7 +201,7 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
  *
  * returns updated user object or error
  */
-router.post('/user-info', upload.none(), async (req, res) => {
+router.post('/user-info', upload.none(), async (req, res, next) => {
   let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
   token = token.replace('Bearer ', '');
 
@@ -251,10 +242,7 @@ router.post('/user-info', upload.none(), async (req, res) => {
 
     return res.status(200).json(user);
   } catch (error) {
-    console.log('Error:', error);
-    return res.status(500).json({
-      error: error.message,
-    });
+    next(error);
   }
 });
 
@@ -263,41 +251,42 @@ router.post('/user-info', upload.none(), async (req, res) => {
  *  Ads a given ad into the current user favorite list
  *
  */
-router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {
-  try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken._id;
-    //const userId = req.user._id;
-    const adId = req.params.adId;
-    console.log('userid', userId);
-    console.log('id', adId);
+router.post(
+  '/favorites/:adId',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decodedToken._id;
+      //const userId = req.user._id;
+      const adId = req.params.adId;
+      console.log('userid', userId);
+      console.log('id', adId);
 
-    if (!adId) {
-      return res.status(400).json({
-        error: "I can't find the ad id",
+      if (!adId) {
+        return res.status(400).json({
+          error: "I can't find the ad id",
+        });
+      }
+      const user = await User.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+        });
+      }
+      // Agregar el ID del anuncio a la lista de favoritos del usuario
+      user.favorites.push(adId);
+
+      // Guardar el usuario actualizado en la base de datos
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Ad added to favorites successfully',
       });
+    } catch (error) {
+      next(error);
     }
-    const user = await User.findUserById(userId);
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-      });
-    }
-    // Agregar el ID del anuncio a la lista de favoritos del usuario
-    user.favorites.push(adId);
-
-    // Guardar el usuario actualizado en la base de datos
-    await user.save();
-
-    return res.status(200).json({
-      message: 'Ad added to favorites successfully',
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Internal server error',
-    });
-  }
-});
+  },
+);
 
 module.exports = router;

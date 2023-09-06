@@ -123,10 +123,10 @@ router.post('/recover-password', async (req, res) => {
 router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
   const { email } = req.body;
   try {
-    //NOTE I get the authenticated user from the req.user object
+    // I get the authenticated user from the req.user object
     const authenticatedUser = req.user;
 
-    //NOTE I look for the user by the email provided
+    // I look for the user by the email provided
     const userToDelete = await User.findByEmail(email);
 
     if (!userToDelete) {
@@ -135,27 +135,27 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
       });
     }
 
-    //NOTE I check if the authenticated user matches the user to delete
+    // I check if the authenticated user matches the user to delete
     if (authenticatedUser.id.toString() !== userToDelete._id.toString()) {
       return res.status(403).json({
         error: 'You do not have permissions to delete this user.',
       });
     }
 
-    //NOTE Generate the token using generateToken
+    // Generate the token using generateToken
     await User.generateToken(userToDelete._id);
 
-    //NOTE Get the updated user with the new token
+    // Get the updated user with the new token
     const userWithToken = await User.findById(userToDelete._id);
 
     try {
-      //NOTE Check the token in resetpassword
+      // Check the token in resetpassword
       const decodedToken = jwt.verify(
         userWithToken.resetpassword,
         process.env.JWT_SECRET,
       );
 
-      //NOTE if the id of the token in resetpassword matches the id of the user's token I delete it
+      // if the id of the token in resetpassword matches the id of the user's token I delete it
       if (decodedToken.userId === userWithToken._id.toString()) {
         await User.deleteUser(userWithToken._id);
         return res.status(200).json({
@@ -179,10 +179,11 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
     });
   }
 });
+
 /**
- *
+ *  post /user-info
  */
-router.post('/user-info', upload.none(), async (req, res) => {
+router.post('/user-info', upload.none(), async (req, res, next) => {
   let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
   token = token.replace('Bearer ', '');
 
@@ -231,45 +232,98 @@ router.post('/user-info', upload.none(), async (req, res) => {
 });
 
 /**
- *  POST /
- *
+ *  POST /favorites/:adId
+ *  return it searches for the user by his id and if he finds it, he puts the id of the ad in favorites
  */
-router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {
-  try {
-    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    // const userId = decodedToken._id;
-    //const userId = req.user._id;
+router.post(
+  '/favorites/:adId',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
     const userId = req.user.id;
     const adId = req.params.adId;
     console.log('userid', userId);
     console.log('id', adId);
+    try {
+      if (!adId) {
+        return res.status(400).json({
+          error: "I can't find the ad id",
+        });
+      }
+      const user = await User.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+        });
+      }
 
-    if (!adId) {
-      return res.status(400).json({
-        error: "I can't find the ad id",
+      // Check if the ad ID already exists in the user's favorites list
+      if (user.favorites.includes(adId)) {
+        return res.status(400).json({
+          error: 'Ad already added to favorites',
+        });
+      }
+
+      // Add the ad ID to the user's favorites list
+      user.favorites.push(adId);
+
+      // Save the updated user in the database
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Ad added to favorites successfully',
       });
+    } catch (error) {
+      next(error);
     }
-    const user = await User.findUserById(userId);
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-      });
+  },
+);
+
+/**
+ *  DELETE /delete-favorite/:adId
+ *  return it searches for the user by his id and if it finds it, it deletes the id of the ad saved in the favorites property
+ */
+router.delete(
+  '/delete-favorite/:adId',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    const userId = req.user.id;
+    const adId = req.params.adId;
+
+    try {
+      if (!adId) {
+        return res.status(400).json({
+          error: "I can't find the ad id",
+        });
+      }
+      const user = await User.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+        });
+      }
+
+      // Check if the ad ID exists in the user's favorites list
+      if (user.favorites.some(favorite => favorite.toString() === adId)) {
+        // Filtra la lista de favoritos para eliminar el ID del anuncio
+        user.favorites = user.favorites.filter(
+          favorite => favorite.toString() !== adId,
+        );
+
+        // Guarda el usuario actualizado en la base de datos
+        await user.save();
+
+        return res.status(200).json({
+          message: 'Ad removed from favorites successfully',
+        });
+      } else {
+        return res.status(400).json({
+          error: 'Ad is not in favorites',
+        });
+      }
+    } catch (error) {
+      next(error);
     }
-    // Agregar el ID del anuncio a la lista de favoritos del usuario
-    user.favorites.push(adId);
-
-    // Guardar el usuario actualizado en la base de datos
-    await user.save();
-
-    return res.status(200).json({
-      message: 'Ad added to favorites successfully',
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Internal server error',
-    });
-  }
-});
+  },
+);
 
 module.exports = router;

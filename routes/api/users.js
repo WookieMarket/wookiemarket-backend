@@ -232,7 +232,7 @@ router.post('/user-info', upload.none(), async (req, res, next) => {
 });
 
 /**
- *  POST /favorites/:adId
+ *  POST /favorites/adId
  *  return it searches for the user by his id and if he finds it, he puts the id of the ad in favorites
  */
 router.post(
@@ -279,7 +279,7 @@ router.post(
 );
 
 /**
- *  DELETE /delete-favorite/:adId
+ *  DELETE /delete-favorite/adId
  *  return it searches for the user by his id and if it finds it, it deletes the id of the ad saved in the favorites property
  */
 router.delete(
@@ -304,12 +304,12 @@ router.delete(
 
       // Check if the ad ID exists in the user's favorites list
       if (user.favorites.some(favorite => favorite.toString() === adId)) {
-        // Filtra la lista de favoritos para eliminar el ID del anuncio
+        // Filter the favorites list to remove the ad ID
         user.favorites = user.favorites.filter(
           favorite => favorite.toString() !== adId,
         );
 
-        // Guarda el usuario actualizado en la base de datos
+        // Save the updated user in the database
         await user.save();
 
         return res.status(200).json({
@@ -320,6 +320,25 @@ router.delete(
           error: 'Ad is not in favorites',
         });
       }
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+/**
+ *  GET /favorite-adverts
+ *  returns all the ads that this user has saved
+ */
+router.get(
+  '/favorite-adverts',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const favoriteAdverts = await User.favoriteAds(userId);
+
+      res.status(200).json({ favoriteAdverts });
     } catch (error) {
       next(error);
     }

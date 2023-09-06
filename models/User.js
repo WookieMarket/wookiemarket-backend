@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { Advert } = require('.');
 
 // Create Schema Users
 const userSchema = mongoose.Schema({
@@ -156,6 +157,43 @@ userSchema.statics.deleteUser = async function (userId) {
     throw new Error(error.message);
   }
 };
+
+/**
+ * method that returns the favorite ads of a user
+ *
+ * @param {userId} userId
+ */
+userSchema.statics.favoriteAds = async function (userId) {
+  try {
+    // Encuentra al usuario por su ID y obtén la matriz de IDs de anuncios favoritos
+    const user = await this.findById(userId).populate('favorites');
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const favoriteAdIds = user.favorites;
+    console.log('usuarioschema', favoriteAdIds);
+
+    return favoriteAdIds;
+  } catch (error) {
+    throw error;
+  }
+};
+// userSchema.statics.favoriteAds = async function (userId) {
+//   try {
+//     // Encuentra al usuario por su ID y popula la matriz de favoritos con detalles de anuncios
+//     const user = await User.findById(userId).populate('favorites');
+//     if (!user) {
+//       throw new Error('User not found');
+//     }
+//     console.log('usuarioschema', user);
+
+//     // La matriz "favorites" ahora contendrá los documentos completos de anuncios
+//     return user.favorites;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 //NOTE create model
 

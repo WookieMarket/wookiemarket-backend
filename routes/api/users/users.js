@@ -256,9 +256,9 @@ router.post(
   jwtAuthApiMiddleware,
   async (req, res, next) => {
     try {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decodedToken._id;
-      //const userId = req.user._id;
+      //const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      //const userId = decodedToken._id;
+      const userId = req.user.id;
       const adId = req.params.adId;
       console.log('userid', userId);
       console.log('id', adId);
@@ -274,6 +274,14 @@ router.post(
           error: 'User not found',
         });
       }
+
+      // Check if the ad ID already exists in the user's favorites list
+      if (user.favorites.includes(adId)) {
+        return res.status(400).json({
+          error: 'Ad already added to favorites',
+        });
+      }
+
       // Agregar el ID del anuncio a la lista de favoritos del usuario
       user.favorites.push(adId);
 

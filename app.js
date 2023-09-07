@@ -5,8 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 require('./lib/connectMongoose');
-
-var indexRouter = require('./routes/index');
+const jwtAuthMiddleware = require('./lib/jwtAuthApiMiddleware');
 
 var app = express();
 const cors = require('cors');
@@ -41,15 +40,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
  */
 app.use('/api/auth/signup', require('./routes/api/auth/signup'));
 app.use('/api/auth/login', require('./routes/api/auth/login'));
-app.use('/api/users', require('./routes/api/users/users'));
+app.use('/api/users', jwtAuthMiddleware, require('./routes/api/users/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
 
+/**
+ * Rutas del Website
+ */
 app.use((req, res, next) => {
   res.locals.session = req.session;
   next();
 });
-
-app.use('/', indexRouter);
+app.use('/', require('./routes/index'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

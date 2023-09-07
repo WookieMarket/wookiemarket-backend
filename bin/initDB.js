@@ -9,26 +9,28 @@ const connection = require('../lib/connectMongoose');
 main().catch(err => console.log('There was a error', err));
 
 async function main() {
-  // initialize user collection
-  await initUsers();
+  // Adds some prelimiar data to user collection
+  await addUsers('./models/Users.json');
 
   // initialize Advert collection
-  await initAdverts();
+  await addAdverts('./models/Adverts.json');
 
   // close connection
   connection.close();
 }
 
 /**
- *  Loads user data and create Users instances
+ * Loads user data and create Users instances
+ *
+ * @param {String} fileName string file name for the data set to be imported
  */
-async function initUsers() {
+async function addUsers(fileName) {
   // Drop data from Users collection
   const deleted = await User.deleteMany();
   console.log(`Eliminated ${deleted.deletedCount} users.`);
 
   // Load users
-  const list = await loadDataFrom('./models/Users.json');
+  const list = await loadDataFrom(fileName);
 
   try {
     const users = await Promise.all(
@@ -48,15 +50,17 @@ async function initUsers() {
 }
 
 /**
- *  Loads Advert data and create Adverts instances
+ * Loads Advert data and create Adverts instances
+ *
+ * @param {String} fileName string file name for the data set to be imported
  */
-async function initAdverts() {
+async function addAdverts(fileName) {
   // Delete all documents in the advert collection
   const deleted = await Advert.deleteMany();
   console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
   // Load advert
-  const adsList = await loadDataFrom('./models/Adverts.json');
+  const adsList = await loadDataFrom(fileName);
 
   try {
     const inserted = await Advert.create(adsList);
@@ -77,3 +81,5 @@ async function loadDataFrom(path) {
   //console.log('Reading JSON', items);
   return items;
 }
+
+module.exports = { addUsers, addAdverts };

@@ -1,0 +1,48 @@
+[
+    {
+        "name": "Ufo Retro",
+        "onSale": true,
+        "price": 2500,
+        "image_url": "http://localhost:3001/images/vintage-ovni.jpg",
+        "category": [
+            "lifestyle",
+            "mobile",
+            "motor"
+        ],
+        "description": "Perfecto para paseos con estilo en la ciudad",
+        "status": "false",
+        "coin": "€",
+        "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+        "username": "testUser"
+    },
+    {
+        "name": "Maquina del tiempo",
+        "onSale": false,
+        "price": 2000,
+        "image_url": "http://localhost:3001/images/time-machine.jpg",
+        "category": [
+            "mobile",
+            "motor"
+        ],
+        "description": "La busco para viajar al mejor tiempo de la historia",
+        "status": "false",
+        "coin": "€",
+        "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+        "username": "testUser"
+    },
+    {
+        "name": "Set de varitas magicas",
+        "onSale": false,
+        "price": 500,
+        "description": "La busco con urgencia para dar toques magicos",
+        "image_url": "http://localhost:3001/images/sorcerer-wand.jpg",
+        "category": [
+            "mobile",
+            "motor"
+        ],
+        "status": "false",
+        "coin": "€",
+        "createdAt": "Wed Aug 16 2023 21:14:26 GMT+0200 (hora de verano de Europa central)",
+        "username": "testUser"
+    }
+]

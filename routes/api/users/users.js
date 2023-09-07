@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../../lib/uploadConfigure');
-const { User } = require('../../models');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const upload = require('../../../lib/uploadConfigure');
+const { User, Advert } = require('../../../models');
 const {
   microEmailService,
   resetPassword,
-} = require('../../lib/microServiceEmailConfig');
-const jwtAuthApiMiddleware = require('../../lib/jwtAuthApiMiddleware');
-const bcrypt = require('bcrypt');
+} = require('../../../lib/microServiceEmailConfig');
+const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 
 /**
  *  GET /users
@@ -41,25 +41,47 @@ router.get('/email/:email', async (req, res, next) => {
 });
 
 /**
- *  GET /users/id (body)
+ *  GET /users/id/:id (params)
  *  returns the user searched for by id
  */
 router.get('/id/:id', async (req, res, next) => {
   try {
     let id = req.params.id;
-    emailUser = await User.findUserById(id);
+    const user = await User.findUserById(id);
 
-    res.json({ results: emailUser });
+    res.json({ results: user });
   } catch (error) {
     next(error);
   }
 });
-//DONE Route to send a password recovery email
+
+/**
+ *  GET /users/:user/ads (params)
+ *  returns list of ads for the given username
+ */
+router.get('/:user/ads', async (req, res, next) => {
+  try {
+    // console.log(req.params);
+    let user = req.params.user;
+    if (!user) {
+      return res.status(400).json({
+        error: "Missing parameter 'user'",
+      });
+    }
+    const filter = { username: user };
+    const ads = await Advert.list(filter);
+    // console.log(ads);
+    res.json({ results: ads });
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
  *  POST /users/email-password (body)
  *  returns an email with a url that has the resetpassword token and the user's email
  */
-router.post('/email-password', async (req, res) => {
+router.post('/email-password', async (req, res, next) => {
   const { to } = req.body;
 
   try {
@@ -69,18 +91,16 @@ router.post('/email-password', async (req, res) => {
       message: 'Password recovery email sent successfully.',
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: 'Error sending password recovery email.',
-    });
+    next(error);
   }
 });
 
 /**
  *  POST /users/recover-password (body)
  *  if the url token and the token inside resetpassword match, the password is changed
+ *  returns {} object message otherwise error
  */
-router.post('/recover-password', async (req, res) => {
+router.post('/recover-password', async (req, res, next) => {
   const { email, token, newPassword } = req.body;
 
   try {
@@ -110,10 +130,7 @@ router.post('/recover-password', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Failed to change password.',
-    });
+    next(error);
   }
 });
 
@@ -121,13 +138,13 @@ router.post('/recover-password', async (req, res) => {
  *  POST /users/deleted-user (body)
  *  asks for the email locates the user takes out his id and deletes it
  */
-router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
+router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res, next) => {
   const { email } = req.body;
   try {
-    //NOTE I get the authenticated user from the req.user object
+    // gets the authenticated user from the req.user object
     const authenticatedUser = req.user;
 
-    //NOTE I look for the user by the email provided
+    // finds user by the provided email
     const userToDelete = await User.findByEmail(email);
 
     if (!userToDelete) {
@@ -136,27 +153,27 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
       });
     }
 
-    //NOTE I check if the authenticated user matches the user to delete
+    // checks if the authenticated user matches the user to delete
     if (authenticatedUser.id.toString() !== userToDelete._id.toString()) {
       return res.status(403).json({
         error: 'You do not have permissions to delete this user.',
       });
     }
 
-    //NOTE Generate the token using generateToken
+    // generates the token using generateToken
     await User.generateToken(userToDelete._id);
 
-    //NOTE Get the updated user with the new token
+    // gets the updated user with the new token
     const userWithToken = await User.findById(userToDelete._id);
 
     try {
-      //NOTE Check the token in resetpassword
+      // checks the token in resetpassword
       const decodedToken = jwt.verify(
         userWithToken.resetpassword,
         process.env.JWT_SECRET,
       );
 
-      //NOTE if the id of the token in resetpassword matches the id of the user's token I delete it
+      // if the id of the token in resetpassword matches the id of the user's token I delete it
       if (decodedToken.userId === userWithToken._id.toString()) {
         await User.deleteUser(userWithToken._id);
         return res.status(200).json({
@@ -174,16 +191,17 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Failed to delete user.',
-    });
+    next(error);
   }
 });
+
 /**
+ * POST /users/user-info (body| query)
+ * updates user information
  *
+ * returns updated user object or error
  */
-router.post('/user-info', upload.none(), async (req, res) => {
+router.post('/user-info', upload.none(), async (req, res, next) => {
   let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
   token = token.replace('Bearer ', '');
 
@@ -224,52 +242,51 @@ router.post('/user-info', upload.none(), async (req, res) => {
 
     return res.status(200).json(user);
   } catch (error) {
-    console.log('Error:', error);
-    return res.status(500).json({
-      error: error.message,
-    });
+    next(error);
   }
 });
 
 /**
- *  POST /
+ *  POST /favorites/:adId (params)
+ *  Ads a given ad into the current user favorite list
  *
  */
-router.post('/favorites/:adId', jwtAuthApiMiddleware, async (req, res) => {
-  try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken._id;
-    //const userId = req.user._id;
-    const adId = req.params.adId;
-    console.log('userid', userId);
-    console.log('id', adId);
+router.post(
+  '/favorites/:adId',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decodedToken._id;
+      //const userId = req.user._id;
+      const adId = req.params.adId;
+      console.log('userid', userId);
+      console.log('id', adId);
 
-    if (!adId) {
-      return res.status(400).json({
-        error: "I can't find the ad id",
+      if (!adId) {
+        return res.status(400).json({
+          error: "I can't find the ad id",
+        });
+      }
+      const user = await User.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+        });
+      }
+      // Agregar el ID del anuncio a la lista de favoritos del usuario
+      user.favorites.push(adId);
+
+      // Guardar el usuario actualizado en la base de datos
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Ad added to favorites successfully',
       });
+    } catch (error) {
+      next(error);
     }
-    const user = await User.findUserById(userId);
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-      });
-    }
-    // Agregar el ID del anuncio a la lista de favoritos del usuario
-    user.favorites.push(adId);
-
-    // Guardar el usuario actualizado en la base de datos
-    await user.save();
-
-    return res.status(200).json({
-      message: 'Ad added to favorites successfully',
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Internal server error',
-    });
-  }
-});
+  },
+);
 
 module.exports = router;

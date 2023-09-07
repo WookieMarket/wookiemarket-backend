@@ -41,7 +41,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
  */
 app.use('/api/auth/signup', require('./routes/api/auth/signup'));
 app.use('/api/auth/login', require('./routes/api/auth/login'));
-app.use('/api/users', require('./routes/api/users'));
+app.use('/api/users', require('./routes/api/users/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
 
 app.use((req, res, next) => {

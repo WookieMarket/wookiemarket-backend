@@ -1,0 +1,14 @@
+[
+    {
+        "email": "noAdsUser@testcom",
+        "password": "1234",
+        "username": "noAdsUser",
+        "resetpassword": ""
+    },
+    {
+        "email": "testUser@testcom",
+        "password": "1234",
+        "username": "testUser",
+        "resetpassword": ""
+    }
+]

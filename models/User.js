@@ -42,11 +42,6 @@ userSchema.statics.findByUsername = function (username) {
   return query;
 };
 
-userSchema.statics.findByUsername = function (username) {
-  const query = User.findOne({ username: username });
-  return query;
-};
-
 /**
  * method to search for a user by his id
  *

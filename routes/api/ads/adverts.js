@@ -12,8 +12,15 @@ const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
  */
 router.get('/', async (req, res, next) => {
   try {
+    // Pagination
+    const skip = parseInt(req.query.skip) || 0;
+    const limit = parseInt(req.query.limit) || 10;
+
     let categories = {};
-    categories = await Advert.find();
+    categories = await Advert.find()
+    .sort({ createdAt: -1 })
+    .skip(Number(skip))
+    .limit(Number(limit));
     res.json({ result: categories });
   } catch (error) {
     next(error);
@@ -78,7 +85,7 @@ router.get('/filter', async (req, res, next) => {
     }
 
     // TODO añadir resto de campos de filtardo
-    const advertsList = await Advert.list(filter, skip, limit, sort, fields);
+    const advertsList = await Advert.list(filter, skip, limit, sort, fields)
 
     res.json({ results: advertsList });
   } catch (error) {

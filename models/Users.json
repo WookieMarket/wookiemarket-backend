@@ -1,28 +1,10 @@
 [
   {
-    "_id": {
-      "$oid": "64f8ae3f6c81a3e4a0927dd2"
-    },
-    "email": "example@example.com",
-    "username": "mando6",
-    "password": "$2b$07$ZmW8h0o.MpwGu4Fr8X.rzel8JFr/f5UVDSvBfBQs8FNDcwQ24CxLS",
-    "resetpassword": "",
-    "favorites": [
-      
-      {
-        "$oid": "64f8ade33da37bd2fe7345c2"
-      },
-      {
-        "$oid": "64f8ade33da37bd2fe7345c1"
-      }
-    ],
-    "__v": 7
-  }
-  {
     "email": "pepito@server.com",
     "password": "superseguro",
     "username": "pepito",
-    "resetpassword": ""
+    "resetpassword": "",
+    "favorites": []
   },
   {
     "_id": {

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Advert } = require('.');
 
 // Create Schema Users
 const userSchema = mongoose.Schema({
@@ -10,6 +9,12 @@ const userSchema = mongoose.Schema({
   password: String,
   resetpassword: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Advert' }],
+  // favorites: [
+  //   {
+  //     advert: { type: mongoose.Schema.Types.ObjectId, ref: 'Advert' },
+  //     isFavorite: { type: Boolean, default: false },
+  //   },
+  // ],
 });
 
 userSchema.statics.usersAll = function () {
@@ -160,13 +165,16 @@ userSchema.statics.deleteUser = async function (userId) {
  */
 userSchema.statics.favoriteAds = async function (userId) {
   try {
-    // Encuentra al usuario por su ID y obtén la matriz de IDs de anuncios favoritos
-    const user = await this.findById(userId).populate('favorites');
+    // Find the user by their ID and get the array of favorite ad IDs
+    const user = await User.findById(userId).populate('favorites');
     if (!user) {
       throw new Error('User not found');
     }
 
     const favoriteAdIds = user.favorites;
+    // Extract the IDs of favorite ads from the array of favorite objects
+    //const favoriteAdIds = user.favorites.map(favorite => favorite.advert);
+
     console.log('usuarioschema', favoriteAdIds);
 
     return favoriteAdIds;
@@ -176,19 +184,45 @@ userSchema.statics.favoriteAds = async function (userId) {
 };
 // userSchema.statics.favoriteAds = async function (userId) {
 //   try {
-//     // Encuentra al usuario por su ID y popula la matriz de favoritos con detalles de anuncios
-//     const user = await User.findById(userId).populate('favorites');
+//     // Find the user by their ID and get the array of favorite ad IDs
+//     const user = await User.findById(userId).populate('favorites.advert');
 //     if (!user) {
 //       throw new Error('User not found');
 //     }
-//     console.log('usuarioschema', user);
 
-//     // La matriz "favorites" ahora contendrá los documentos completos de anuncios
-//     return user.favorites;
+//     //const favoriteAdIds = user.favorites;
+//     // Extract the IDs of favorite ads from the array of favorite objects
+//     const favoriteAdIds = user.favorites.map(favorite => favorite.advert);
+
+//     console.log('usuarioschema', favoriteAdIds);
+
+//     return favoriteAdIds;
 //   } catch (error) {
 //     throw error;
 //   }
 // };
+
+userSchema.statics.isFavorite = async function (userId) {
+  try {
+    // Find the user by their ID and get the array of favorite ad IDs
+    const user = await User.findById(userId).populate('favorites.advert');
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Extract the favorite ad objects
+    const favoriteAds = user.favorites;
+
+    const favoriteAdIdsWithIsFavorite = favoriteAds.map(favorite => ({
+      _id: favorite.advert._id, // ID del anuncio
+      isFavorite: favorite.isFavorite, // Propiedad isFavorite
+    }));
+
+    return favoriteAdIdsWithIsFavorite;
+  } catch (error) {
+    throw error;
+  }
+};
 
 //NOTE create model
 

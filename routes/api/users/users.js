@@ -275,8 +275,20 @@ router.post(
         });
       }
 
+      // if (
+      //   user.favorites.some(favorite => favorite.advert.toString() === adId)
+      // ) {
+      //   return res.status(400).json({
+      //     error: 'Ad already added to favorites',
+      //   });
+      // }
+      // user.favorites.push({
+      //   advert: adId,
+      //   isFavorite: true,
+      // });
+
       // Check if the ad ID already exists in the user's favorites list
-      if (user.favorites.includes(adId)) {
+      if (user.favorites.some(favorite => favorite.toString() === adId)) {
         return res.status(400).json({
           error: 'Ad already added to favorites',
         });
@@ -288,8 +300,12 @@ router.post(
       // Guardar el usuario actualizado en la base de datos
       await user.save();
 
+      // Obtener el anuncio recién agregado
+      const addedAd = await Advert.findById(adId);
+
       return res.status(200).json({
         message: 'Ad added to favorites successfully',
+        addedAd: addedAd,
       });
     } catch (error) {
       next(error);
@@ -339,6 +355,27 @@ router.delete(
           error: 'Ad is not in favorites',
         });
       }
+
+      // // Verificar si el adId existe en el array favorites.advert
+      // const isAdInFavorites = user.favorites.some(
+      //   favorite => favorite.advert.toString() === adId,
+      // );
+
+      // if (!isAdInFavorites) {
+      //   return res.status(400).json({
+      //     error: 'Ad is not in favorites',
+      //   });
+      // }
+
+      // // Usar $pull para eliminar el objeto con advert igual a adId del array favorites
+      // await User.updateOne(
+      //   { _id: userId },
+      //   { $pull: { favorites: { advert: adId } } },
+      // );
+
+      // return res.status(200).json({
+      //   message: 'Ad removed from favorites successfully',
+      // });
     } catch (error) {
       next(error);
     }
@@ -357,7 +394,7 @@ router.get(
       const userId = req.user.id;
       const favoriteAdverts = await User.favoriteAds(userId);
 
-      res.status(200).json({ favoriteAdverts });
+      res.status(200).json(favoriteAdverts);
     } catch (error) {
       next(error);
     }

@@ -86,8 +86,8 @@ router.get('/filter', async (req, res, next) => {
 
     // TODO añadir resto de campos de filtardo
     const advertsList = await Advert.list(filter, skip, limit, sort, fields)
-
-    res.json({ results: advertsList });
+    const totalCountAds = advertsList.length;
+    res.json({ results: advertsList, totalCountAds });
   } catch (error) {
     next(error);
   }

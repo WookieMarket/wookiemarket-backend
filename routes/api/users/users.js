@@ -256,12 +256,8 @@ router.post(
   jwtAuthApiMiddleware,
   async (req, res, next) => {
     try {
-      //const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-      //const userId = decodedToken._id;
       const userId = req.user.id;
       const adId = req.params.adId;
-      console.log('userid', userId);
-      console.log('id', adId);
 
       if (!adId) {
         return res.status(400).json({
@@ -275,18 +271,6 @@ router.post(
         });
       }
 
-      // if (
-      //   user.favorites.some(favorite => favorite.advert.toString() === adId)
-      // ) {
-      //   return res.status(400).json({
-      //     error: 'Ad already added to favorites',
-      //   });
-      // }
-      // user.favorites.push({
-      //   advert: adId,
-      //   isFavorite: true,
-      // });
-
       // Check if the ad ID already exists in the user's favorites list
       if (user.favorites.some(favorite => favorite.toString() === adId)) {
         return res.status(400).json({
@@ -294,13 +278,11 @@ router.post(
         });
       }
 
-      // Agregar el ID del anuncio a la lista de favoritos del usuario
       user.favorites.push(adId);
 
-      // Guardar el usuario actualizado en la base de datos
       await user.save();
 
-      // Obtener el anuncio recién agregado
+      // Get the newly added ad
       const addedAd = await Advert.findById(adId);
 
       return res.status(200).json({
@@ -355,27 +337,6 @@ router.delete(
           error: 'Ad is not in favorites',
         });
       }
-
-      // // Verificar si el adId existe en el array favorites.advert
-      // const isAdInFavorites = user.favorites.some(
-      //   favorite => favorite.advert.toString() === adId,
-      // );
-
-      // if (!isAdInFavorites) {
-      //   return res.status(400).json({
-      //     error: 'Ad is not in favorites',
-      //   });
-      // }
-
-      // // Usar $pull para eliminar el objeto con advert igual a adId del array favorites
-      // await User.updateOne(
-      //   { _id: userId },
-      //   { $pull: { favorites: { advert: adId } } },
-      // );
-
-      // return res.status(200).json({
-      //   message: 'Ad removed from favorites successfully',
-      // });
     } catch (error) {
       next(error);
     }

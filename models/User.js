@@ -9,12 +9,6 @@ const userSchema = mongoose.Schema({
   password: String,
   resetpassword: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Advert' }],
-  // favorites: [
-  //   {
-  //     advert: { type: mongoose.Schema.Types.ObjectId, ref: 'Advert' },
-  //     isFavorite: { type: Boolean, default: false },
-  //   },
-  // ],
 });
 
 userSchema.statics.usersAll = function () {
@@ -128,9 +122,7 @@ userSchema.statics.updateUserData = async function (data, id) {
       const hashedPassword = await this.hashPassword(newPassword);
       user.password = hashedPassword;
     }
-    // }else{
-    //   throw new Error('It is not possible to change the password');
-    // }
+
     user.save();
     return user;
   } catch (error) {
@@ -167,58 +159,13 @@ userSchema.statics.favoriteAds = async function (userId) {
   try {
     // Find the user by their ID and get the array of favorite ad IDs
     const user = await User.findById(userId).populate('favorites');
+
     if (!user) {
       throw new Error('User not found');
     }
 
     const favoriteAdIds = user.favorites;
-    // Extract the IDs of favorite ads from the array of favorite objects
-    //const favoriteAdIds = user.favorites.map(favorite => favorite.advert);
-
-    console.log('usuarioschema', favoriteAdIds);
-
     return favoriteAdIds;
-  } catch (error) {
-    throw error;
-  }
-};
-// userSchema.statics.favoriteAds = async function (userId) {
-//   try {
-//     // Find the user by their ID and get the array of favorite ad IDs
-//     const user = await User.findById(userId).populate('favorites.advert');
-//     if (!user) {
-//       throw new Error('User not found');
-//     }
-
-//     //const favoriteAdIds = user.favorites;
-//     // Extract the IDs of favorite ads from the array of favorite objects
-//     const favoriteAdIds = user.favorites.map(favorite => favorite.advert);
-
-//     console.log('usuarioschema', favoriteAdIds);
-
-//     return favoriteAdIds;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
-
-userSchema.statics.isFavorite = async function (userId) {
-  try {
-    // Find the user by their ID and get the array of favorite ad IDs
-    const user = await User.findById(userId).populate('favorites.advert');
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    // Extract the favorite ad objects
-    const favoriteAds = user.favorites;
-
-    const favoriteAdIdsWithIsFavorite = favoriteAds.map(favorite => ({
-      _id: favorite.advert._id, // ID del anuncio
-      isFavorite: favorite.isFavorite, // Propiedad isFavorite
-    }));
-
-    return favoriteAdIdsWithIsFavorite;
   } catch (error) {
     throw error;
   }

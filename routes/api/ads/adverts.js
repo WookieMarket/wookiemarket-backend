@@ -18,9 +18,9 @@ router.get('/', async (req, res, next) => {
 
     let categories = {};
     categories = await Advert.find()
-    .sort({ createdAt: -1 })
-    .skip(Number(skip))
-    .limit(Number(limit));
+      .sort({ createdAt: -1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
     res.json({ result: categories });
   } catch (error) {
     next(error);
@@ -85,7 +85,7 @@ router.get('/filter', async (req, res, next) => {
     }
 
     // TODO añadir resto de campos de filtardo
-    const advertsList = await Advert.list(filter, skip, limit, sort, fields)
+    const advertsList = await Advert.list(filter, skip, limit, sort, fields);
     const totalCountAds = advertsList.length;
     res.json({ results: advertsList, totalCountAds });
   } catch (error) {
@@ -232,6 +232,18 @@ router.get('/find/:id', async (req, res, next) => {
     res.json({ result: advert });
   } catch (error) {
     next(error);
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Advert.findByIdAndDelete(id);
+
+    // Sends a response to the client indicating that the advertisement was successfully removed.
+    res.status(200).send({ message: 'Advert deleted successfully' });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
 });
 

@@ -5,11 +5,12 @@ const Advert = require('../../../../models/advert');
 
 describe('My API', () => {
   const id = '1';
+  const id2= '2'
   it('should make a call to find an ad by ID', async () => {
     //Create a stub for the `findById` method of the Advert model
     const findByIdStub = sinon
       .stub(Advert, 'findById')
-      .resolves({ name: 'Anuncio 1' });
+      .resolves({ name: 'Advert 1' });
 
     const result = await Advert.findById(id);
 
@@ -17,7 +18,7 @@ describe('My API', () => {
     expect(findByIdStub.calledOnce).to.be.true;
 
     // Verify that the function returned the expected result
-    expect(result).to.deep.equal({ name: 'Anuncio 1' });
+    expect(result).to.deep.equal({ name: 'Advert 1' });
 
     // Restore original behavior of `findById` method
     findByIdStub.restore();
@@ -42,4 +43,19 @@ describe('My API', () => {
 
     findByIdStub.restore();
   });
+  it('should make a call to delete an ad by ID', async () => {
+    // Creates a stub for the `findByIdAndDelete` method of the Advert model
+    const findByIdAndDeleteStub = sinon
+      .stub(Advert, 'findByIdAndDelete')
+      .resolves({ name: 'Advert 2' });
+
+    const result = await Advert.findByIdAndDelete(id2);
+
+    expect(findByIdAndDeleteStub.calledOnce).to.be.true;
+    expect(result).to.deep.equal({ name: 'Advert 2' });
+
+    // Restores the original behaviour of the `findByIdAndDelete` method.
+    findByIdAndDeleteStub.restore();
+  });
+  
 });

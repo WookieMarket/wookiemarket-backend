@@ -221,7 +221,7 @@ router.post('/user-info', upload.none(), async (req, res, next) => {
 
     // Verifica si se proporcionó la contraseña actual y si es correcta
     if (data.password) {
-      const passwordMatch = await bcrypt.compare(data.password, user.password);
+      const passwordMatch = await user.comparePassword(data.password);
       if (!passwordMatch) {
         return res.status(400).json({ error: 'Contraseña incorrecta' });
       }
@@ -229,7 +229,7 @@ router.post('/user-info', upload.none(), async (req, res, next) => {
 
     // Si se proporciona una nueva contraseña, cámbiala
     if (data.newPassword) {
-      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const hashedPassword = await User.hashPassword(data.newPassword);
       user.password = hashedPassword;
     }
 
@@ -256,12 +256,8 @@ router.post(
   jwtAuthApiMiddleware,
   async (req, res, next) => {
     try {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decodedToken._id;
-      //const userId = req.user._id;
+      const userId = req.user.id;
       const adId = req.params.adId;
-      console.log('userid', userId);
-      console.log('id', adId);
 
       if (!adId) {
         return res.status(400).json({
@@ -274,15 +270,92 @@ router.post(
           error: 'User not found',
         });
       }
-      // Agregar el ID del anuncio a la lista de favoritos del usuario
+
+      // Check if the ad ID already exists in the user's favorites list
+      if (user.favorites.some(favorite => favorite.toString() === adId)) {
+        return res.status(400).json({
+          error: 'Ad already added to favorites',
+        });
+      }
+
       user.favorites.push(adId);
 
-      // Guardar el usuario actualizado en la base de datos
       await user.save();
+
+      // Get the newly added ad
+      const addedAd = await Advert.findById(adId);
 
       return res.status(200).json({
         message: 'Ad added to favorites successfully',
+        addedAd: addedAd,
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+/**
+ *  DELETE /delete-favorite/adId
+ *  return it searches for the user by his id and if it finds it, it deletes the id of the ad saved in the favorites property
+ */
+router.delete(
+  '/delete-favorite/:adId',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    const userId = req.user.id;
+    const adId = req.params.adId;
+
+    try {
+      if (!adId) {
+        return res.status(400).json({
+          error: "I can't find the ad id",
+        });
+      }
+      const user = await User.findUserById(userId);
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+        });
+      }
+
+      // Check if the ad ID exists in the user's favorites list
+      if (user.favorites.some(favorite => favorite.toString() === adId)) {
+        // Filter the favorites list to remove the ad ID
+        user.favorites = user.favorites.filter(
+          favorite => favorite.toString() !== adId,
+        );
+
+        // Save the updated user in the database
+        await user.save();
+
+        return res.status(200).json({
+          message: 'Ad removed from favorites successfully',
+        });
+      } else {
+        return res.status(400).json({
+          error: 'Ad is not in favorites',
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+/**
+ *  GET /favorite-adverts
+ *  returns all the ads that this user has saved
+ */
+router.get(
+  '/favorite-adverts',
+  jwtAuthApiMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const favoriteAdverts = await User.favoriteAds(userId);
+
+      res.status(200).json(favoriteAdverts);
     } catch (error) {
       next(error);
     }

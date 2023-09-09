@@ -23,8 +23,12 @@ advertSchema.statics.list = function (filter, skip, limit, sort, fields) {
   query.sort(sort);
   query.select(fields);
 
-  //TODO necesitamos saber el total de anuncios que hay en la BD para luego la paginacón
   return query.exec();
+};
+
+//How many ads are there?
+advertSchema.statics.countAds = function (filter) {
+  return this.countDocuments(filter).exec();
 };
 
 // Método estático para obtener elementos únicos en la matriz 'category'

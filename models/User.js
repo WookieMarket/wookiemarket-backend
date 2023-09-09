@@ -122,9 +122,7 @@ userSchema.statics.updateUserData = async function (data, id) {
       const hashedPassword = await this.hashPassword(newPassword);
       user.password = hashedPassword;
     }
-    // }else{
-    //   throw new Error('It is not possible to change the password');
-    // }
+
     user.save();
     return user;
   } catch (error) {
@@ -149,6 +147,27 @@ userSchema.statics.deleteUser = async function (userId) {
   } catch (error) {
     console.error(error);
     throw new Error(error.message);
+  }
+};
+
+/**
+ * method that returns the favorite ads of a user
+ *
+ * @param {userId} userId
+ */
+userSchema.statics.favoriteAds = async function (userId) {
+  try {
+    // Find the user by their ID and get the array of favorite ad IDs
+    const user = await User.findById(userId).populate('favorites');
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const favoriteAdIds = user.favorites;
+    return favoriteAdIds;
+  } catch (error) {
+    throw error;
   }
 };
 

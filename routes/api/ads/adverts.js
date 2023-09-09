@@ -3,6 +3,8 @@ const router = express.Router();
 const { Advert, User } = require('../../../models');
 const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
+const path = require('path');
+const fs = require('fs');
 
 /**
  *  Returns all ads
@@ -238,10 +240,30 @@ router.get('/find/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
+    const ad = await Advert.findById(id);
+    //console.log('anuncio eliminado', ad);
+
+    const fileName = ad.image.split('/').pop();
+    console.log('anuncio eliminado', fileName);
+
+    const imagePath = path.join('public', 'images', fileName);
+
     await Advert.findByIdAndDelete(id);
 
+    // Elimina el archivo en la carpeta pública
+    fs.unlink(imagePath, err => {
+      if (err) {
+        console.error('Error al eliminar el archivo:', err);
+      } else {
+        console.log('Archivo eliminado con éxito:', imagePath);
+      }
+    });
+
     // Sends a response to the client indicating that the advertisement was successfully removed.
-    res.status(200).send({ message: 'Advert deleted successfully' });
+    res.status(200).send({
+      message: 'Advert deleted successfully',
+      adDeleted: ad._id,
+    });
   } catch (error) {
     res.status(500).send({ error: error.message });
   }

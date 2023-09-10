@@ -259,6 +259,22 @@ router.delete('/:id', async (req, res) => {
       }
     });
 
+    // Obtener la lista de usuarios que tienen el anuncio en sus favoritos
+    const usersToUpdate = await User.find({ favorites: ad._id });
+    console.log('usuario', usersToUpdate);
+
+    // Actualizar la lista de favoritos de cada usuario
+    usersToUpdate.forEach(async user => {
+      const index = user.favorites.indexOf(ad._id);
+      if (index !== -1) {
+        // Si se encuentra el ID del anuncio en la lista de favoritos del usuario, eliminarlo
+        user.favorites.splice(index, 1);
+        // Guardar los cambios en la base de datos
+        await user.save();
+      }
+    });
+    //console.log('usuarioid borrado', usersToUpdate);
+
     // Sends a response to the client indicating that the advertisement was successfully removed.
     res.status(200).send({
       message: 'Advert deleted successfully',

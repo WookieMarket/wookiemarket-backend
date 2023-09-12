@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../../../models');
 const createError = require('http-errors');
+const jwt = require('jsonwebtoken');
 
 /**
  *  POST /auth/signup (body)
@@ -21,8 +22,25 @@ router.post('/', async (req, res, next) => {
       password: hashedPassword,
       resetpassword: '',
     });
-    //console.log(`New account created.'${addedUser}`);
-    res.json({ result: `New account created. Username: ${username}` });
+
+    console.log(`New account created.'${addedUser}`);
+
+    if (addedUser) {
+      // If it exists and the password matches
+      //console.log(`New account created.'${addedUser._id}`);
+
+      const tokenApi = jwt.sign(
+        { _id: addedUser._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '2d' },
+      );
+      res.json({
+        message: `New account created. Username: ${username}`,
+        jwt: tokenApi,
+      });
+    } else {
+      next(err);
+    }
   } catch (err) {
     const { username, email } = req.body;
     if (err.code == 11000) {

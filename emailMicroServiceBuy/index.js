@@ -12,23 +12,13 @@ main().catch(err => console.log('There was an error', err));
 
 async function main() {
   emailResponder.on('send_email', async (req, done) => {
-    const {
-      to,
-      from,
-      templateId,
-      custom_message,
-      dynamic_template_data: { email, token },
-    } = req;
+    const { to, from, templateId, message } = req;
     try {
       const msg = {
         to,
         from,
         templateId,
-        custom_message,
-        dynamic_template_data: {
-          email,
-          token,
-        },
+        text: message,
       };
 
       const info = await sgMail.send(msg);

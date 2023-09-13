@@ -6,6 +6,7 @@ const upload = require('../../../lib/uploadConfigure');
 const { User, Advert } = require('../../../models');
 const {
   microEmailService,
+  microEmailServiceBuy,
   resetPassword,
 } = require('../../../lib/microServiceEmailConfig');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
@@ -86,6 +87,24 @@ router.post('/email-password', async (req, res, next) => {
 
   try {
     await microEmailService(to);
+
+    res.status(200).json({
+      message: 'Password recovery email sent successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ *  POST /users/email-password (body)
+ *  returns an email with a url that has the resetpassword token and the user's email
+ */
+router.post('/email-buy', async (req, res, next) => {
+  const { to, custom_message, userFrom } = req.body;
+
+  try {
+    await microEmailServiceBuy(to, custom_message, userFrom);
 
     res.status(200).json({
       message: 'Password recovery email sent successfully.',

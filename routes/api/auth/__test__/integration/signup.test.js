@@ -37,10 +37,11 @@ describe('POST /api/auth/signup endpoint', () => {
       });
 
     // Check the response
-    console.log(response.body);
+    // console.log(response.body);
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('result');
-    expect(response.body.result).toBe(
+    expect(response.body).toHaveProperty('message');
+    expect(response.body).toHaveProperty('jwt');
+    expect(response.body.message).toBe(
       `New account created. Username: newUser${generatedKey}`,
     );
 

@@ -16,6 +16,7 @@ async function main() {
       to,
       from,
       templateId,
+      custom_message,
       dynamic_template_data: { email, token },
     } = req;
     try {
@@ -23,6 +24,7 @@ async function main() {
         to,
         from,
         templateId,
+        custom_message,
         dynamic_template_data: {
           email,
           token,

@@ -97,13 +97,32 @@ router.post('/email-password', async (req, res, next) => {
 });
 
 /**
- *  POST /users/email-password (body)
- *  returns an email with a url that has the resetpassword token and the user's email
+ *  POST /users/email-buy (body)
+ *  Send an email to the owner of the ad with the message and in the body of the email the buyer's email
  */
-router.post('/email-buy', async (req, res, next) => {
-  const { to, custom_message, userFrom } = req.body;
+router.post('/email-buy', jwtAuthApiMiddleware, async (req, res, next) => {
+  const { adOwnerId, custom_message } = req.body;
 
   try {
+    // search for the owner of the ad by the id
+    const idOwnerArticle = await Advert.findById(adOwnerId);
+    console.log('anuncio', idOwnerArticle);
+
+    if (!idOwnerArticle) {
+      throw new Error('ad not found');
+    }
+
+    const ownerArticle = await User.userId(idOwnerArticle.userId);
+
+    // ad owner email
+    to = ownerArticle.email;
+    console.log('correo', to);
+
+    // obtain the email of the user who is registered
+    const userId = req.user.id;
+    const registeredUser = await User.userId(userId);
+    const userFrom = registeredUser.email;
+
     await microEmailServiceBuy(to, custom_message, userFrom);
 
     res.status(200).json({
@@ -231,32 +250,32 @@ router.post('/user-info', upload.none(), async (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decodedToken._id;
 
-    // Obtén el usuario actual
+    // Get the current user
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Verifica si se proporcionó la contraseña actual y si es correcta
+    // Check if the current password was provided and if it is correct
     if (data.password) {
       const passwordMatch = await user.comparePassword(data.password);
       if (!passwordMatch) {
-        return res.status(400).json({ error: 'Contraseña incorrecta' });
+        return res.status(400).json({ error: 'Incorrect password' });
       }
     }
 
-    // Si se proporciona una nueva contraseña, cámbiala
+    // Update user data
+    // If a new password is provided, encrypt it
     if (data.newPassword) {
       const hashedPassword = await User.hashPassword(data.newPassword);
       user.password = hashedPassword;
     }
 
-    // Actualiza otros datos del usuario según sea necesario
     user.email = data.email;
     user.username = data.username;
 
-    // Guarda el usuario actualizado en la base de datos
+    // Save the updated user to the database
     await user.save();
 
     return res.status(200).json(user);

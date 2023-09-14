@@ -17,6 +17,11 @@ userSchema.statics.usersAll = function () {
   return query;
 };
 
+userSchema.statics.userId = function (id) {
+  const user = User.findById(id);
+  return user;
+};
+
 userSchema.statics.hashPassword = function (rawPassword) {
   return bcrypt.hash(rawPassword, 7);
 };

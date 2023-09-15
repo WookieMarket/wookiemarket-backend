@@ -1,10 +1,9 @@
 const socketIo = require('socket.io');
 const { Advert } = require('../models');
-
-let io;
+const app = require('../app');
 
 function initializeSocket(server) {
-  io = socketIo(server, {
+  const io = socketIo(server, {
     cors: {
       origin: process.env.CORS_ORIGIN,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -13,27 +12,14 @@ function initializeSocket(server) {
       optionsSuccessStatus: 200,
     },
   });
+  app.set('io', io); // Pasar 'io' como parámetro
 
   // Configura Socket.io para escuchar cambios en la base de datos
   io.on('connection', socket => {
-    console.log('Cliente conectado');
+    console.log('Cliente conectado', socket.id);
 
     // Cuando un cliente se conecta, se une a una sala específica
-    socket.join('anuncios');
-
-    // Escucha cambios en el campo "price" de la base de datos y emite notificaciones a la sala
-    Advert.watch().on('change', change => {
-      if (
-        change.operationType === 'insert' &&
-        change.updateDescription.updatedFields.hasOwnProperty('price')
-      ) {
-        // Emitir notificación cuando se actualiza el campo "price" de un anuncio
-        io.to('anuncios').emit('priceActualizado', {
-          advertId: change.documentKey._id,
-        });
-        console.log('Precio actualizado:', change.documentKey._id);
-      }
-    });
+    //socket.join('anuncios');
 
     socket.on('joinRoom', roomName => {
       // Unir al cliente a la sala especificada
@@ -42,7 +28,7 @@ function initializeSocket(server) {
     });
 
     socket.on('disconnect', () => {
-      console.log('Cliente desconectado');
+      console.log('Cliente desconectado', socket.id);
     });
   });
 }

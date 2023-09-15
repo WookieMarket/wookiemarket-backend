@@ -6,7 +6,6 @@
 
 //NOTE cargo dotenv antes de que se cargue app
 require('dotenv').config();
-const socketIo = require('socket.io');
 
 var app = require('../app');
 var debug = require('debug')('wookiemarket-backend:server');

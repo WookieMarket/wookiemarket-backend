@@ -68,45 +68,44 @@ router.get('/filter', async (req, res, next) => {
 
     // Fields
     const fields = req.query.fields;
-// Filters
-const filterByName = req.query.name;
-const filterByCategory = req.query.category;
-const filterByMinPrice = req.query.minPrice || 0;
-const filterByMaxPrice = req.query.maxPrice || Infinity;
-const filterByPrice = req.query.price;
-const filter = {};
-if (filterByName) {
-  filter.name = { $regex: filterByName, $options: 'i' }; //Case-sensitive and case-insensitive and word-searchable
-}
-if (filterByCategory) {
-  const categories = filterByCategory
-    .split(',')
-    .map((category) => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
-  filter.category = { $all: categories };
-}
-if (filterByMinPrice) {
-  filter.price = { ...filter.price, $gte: Number(filterByMinPrice) };
-}
-if (filterByMaxPrice) {
-  filter.price = { ...filter.price, $lte: Number(filterByMaxPrice) };
-}
-if (filterByPrice) {
-  filter.price = Number(filterByPrice);
-}
+    // Filters
+    const filterByName = req.query.name;
+    const filterByCategory = req.query.category;
+    const filterByMinPrice = req.query.minPrice || 0;
+    const filterByMaxPrice = req.query.maxPrice || Infinity;
+    const filterByPrice = req.query.price;
+    const filter = {};
+    if (filterByName) {
+      filter.name = { $regex: filterByName, $options: 'i' }; //Case-sensitive and case-insensitive and word-searchable
+    }
+    if (filterByCategory) {
+      const categories = filterByCategory
+        .split(',')
+        .map(category => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
+      filter.category = { $all: categories };
+    }
+    if (filterByMinPrice) {
+      filter.price = { ...filter.price, $gte: Number(filterByMinPrice) };
+    }
+    if (filterByMaxPrice) {
+      filter.price = { ...filter.price, $lte: Number(filterByMaxPrice) };
+    }
+    if (filterByPrice) {
+      filter.price = Number(filterByPrice);
+    }
 
-const [advertsList, total] = await Promise.all([
-  Advert.list(filter, skip, limit, sort, fields),
-  Advert.count(filter),
-]);
+    const [advertsList, total] = await Promise.all([
+      Advert.list(filter, skip, limit, sort, fields),
+      Advert.count(filter),
+    ]);
 
-const totalCountAds = await Advert.countAds(filter);
-console.log(`Total count of matching adverts: ${totalCountAds}`);
+    const totalCountAds = await Advert.countAds(filter);
+    console.log(`Total count of matching adverts: ${totalCountAds}`);
 
-res.json({ results: advertsList, totalCountAds });
-
-} catch (error) {
-next(error);
-}
+    res.json({ results: advertsList, totalCountAds });
+  } catch (error) {
+    next(error);
+  }
 });
 
 //
@@ -142,18 +141,14 @@ router.post(
       // Get the ID of the authenticated user from the JWT token
       const userId = req.user.id;
 
-      //console.log('anunciooooo', userId);
-
       // Makes a query by UserId
       const user = await User.findUserById(userId);
       console.log('ooooo', user);
       if (!user) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+        return res.status(404).json({ error: 'User not found' });
       }
 
       const imageFilename = req.file ? req.file.filename : '';
-      // Url for the image that is saved in the DB
-      //const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
       let imageUrl = '';
 
       if (imageFilename) {
@@ -203,6 +198,11 @@ router.put(
       // Search for the ad by its ID and owner
       const advert = await Advert.findById(adId);
 
+      let imageUrl;
+
+      // I get the path of the old image if it exists
+      const oldImagePath = advert.image;
+
       if (!advert) {
         return res.status(404).json({ error: 'ad not found' });
       }
@@ -217,15 +217,42 @@ router.put(
       // Handle image update
       if (req.file) {
         const imageFilename = req.file.filename;
-        const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+        imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+
         updatedData.image = imageUrl;
       }
+
+      // Add the current date to the ad
+      updatedData.createdAt = new Date();
 
       // Merge updated data into the existing ad
       Object.assign(advert, updatedData);
 
       // Save the updated ad
       const updatedAd = await advert.save();
+
+      // If an old image exists and the new image is different
+      if (oldImagePath && oldImagePath !== imageUrl) {
+        // Delete the old image from the public folder
+        const oldImageFileName = oldImagePath.split('/').pop();
+
+        const oldImagePathOnDisk = path.join(
+          'public',
+          'images',
+          oldImageFileName,
+        );
+
+        fs.unlink(oldImagePathOnDisk, err => {
+          if (err) {
+            console.error('Error al eliminar la imagen antigua:', err);
+          } else {
+            console.log(
+              'Imagen antigua eliminada con éxito.',
+              oldImagePathOnDisk,
+            );
+          }
+        });
+      }
 
       res.json({ result: updatedAd });
     } catch (error) {

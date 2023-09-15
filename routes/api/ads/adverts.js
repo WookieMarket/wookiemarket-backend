@@ -255,7 +255,7 @@ router.put(
       // Save the updated ad
       const updatedAd = await advert.save();
 
-      // Emitir evento de cambio
+      // Emitir evento de cambio en price
       io.to('anuncios').emit('priceActualizado', {
         advertId: adId,
         nuevoPrecio: updatedAd.price,

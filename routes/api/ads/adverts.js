@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Advert, User } = require('../../../models');
+const { Advert, User, Notifications } = require('../../../models');
 const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 const path = require('path');
@@ -257,8 +257,28 @@ router.put(
 
       // Emitir evento de cambio en price
       io.to('anuncios').emit('priceActualizado', {
+        userId: userId,
         advertId: adId,
         nuevoPrecio: updatedAd.price,
+      });
+
+      // Encuentra a los usuarios que tienen este anuncio en su lista de favoritos
+      const usersWithFavorite = await User.find({ favorites: adId });
+      console.log('favorites', usersWithFavorite);
+
+      // Ahora puedes enviar notificaciones a los usuarios correspondientes
+      usersWithFavorite.forEach(async user => {
+        const notificacionData = {
+          userId: userId, // ID del usuario al que se enviará la notificación
+          advertId: adId,
+          message: updatedAd.price, // Mensaje de la notificación
+        };
+
+        // Crear una instancia de la notificación y guardarla en la base de datos
+        const nuevaNotificacion = new Notifications(notificacionData);
+        await nuevaNotificacion.save();
+
+        // Luego puedes enviar la notificación a través de tu sistema de notificaciones
       });
 
       res.json({ result: updatedAd });

@@ -3,7 +3,7 @@
 // Import local variable values
 require('dotenv').config();
 
-const { Advert, User } = require('../models');
+const { Advert, User, Notifications } = require('../models');
 const connection = require('../lib/connectMongoose');
 
 main().catch(err => console.log('There was a error', err));
@@ -14,6 +14,8 @@ async function main() {
 
   // initialize Advert collection
   await addAdverts('./models/Adverts.json');
+  // initialize Notifications collection
+  await initNotifications('./models/Notifications.json');
 
   // close connection
   connection.close();
@@ -70,6 +72,22 @@ async function addAdverts(fileName) {
   }
 }
 
+async function initNotifications(fileName) {
+  // Elimina todas las notificaciones existentes
+  const deleted = await Notifications.deleteMany();
+  console.log(`Deleted ${deleted.deletedCount} notifications`);
+
+  // Load advert
+  const adsList = await loadDataFrom(fileName);
+
+  try {
+    const inserted = await Notifications.create(adsList);
+    console.log(`Importing notifications...'${inserted}`);
+  } catch (error) {
+    console.log('error', error);
+  }
+}
+
 /**
  * This loads data from a given file path
  * @param {String} path where the JSON file is allocated
@@ -82,4 +100,4 @@ async function loadDataFrom(path) {
   return items;
 }
 
-module.exports = { addUsers, addAdverts };
+module.exports = { addUsers, addAdverts, initNotifications };

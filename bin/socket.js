@@ -12,11 +12,15 @@ function initializeSocket(server) {
       optionsSuccessStatus: 200,
     },
   });
+  console.log('cors', process.env.CORS_ORIGIN);
   app.set('io', io); // Pasar 'io' como parámetro
 
   // Configura Socket.io para escuchar cambios en la base de datos
   io.on('connection', socket => {
     console.log('Cliente conectado', socket.id);
+
+    // Emitir un mensaje desde el servidor al cliente
+    socket.emit('mensajeDesdeServidor', '¡Hola desde el servidor!');
 
     // Cuando un cliente se conecta, se une a una sala específica
     //socket.join('anuncios');

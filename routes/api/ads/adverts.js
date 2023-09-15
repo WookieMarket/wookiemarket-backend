@@ -68,45 +68,44 @@ router.get('/filter', async (req, res, next) => {
 
     // Fields
     const fields = req.query.fields;
-// Filters
-const filterByName = req.query.name;
-const filterByCategory = req.query.category;
-const filterByMinPrice = req.query.minPrice || 0;
-const filterByMaxPrice = req.query.maxPrice || Infinity;
-const filterByPrice = req.query.price;
-const filter = {};
-if (filterByName) {
-  filter.name = { $regex: filterByName, $options: 'i' }; //Case-sensitive and case-insensitive and word-searchable
-}
-if (filterByCategory) {
-  const categories = filterByCategory
-    .split(',')
-    .map((category) => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
-  filter.category = { $all: categories };
-}
-if (filterByMinPrice) {
-  filter.price = { ...filter.price, $gte: Number(filterByMinPrice) };
-}
-if (filterByMaxPrice) {
-  filter.price = { ...filter.price, $lte: Number(filterByMaxPrice) };
-}
-if (filterByPrice) {
-  filter.price = Number(filterByPrice);
-}
+    // Filters
+    const filterByName = req.query.name;
+    const filterByCategory = req.query.category;
+    const filterByMinPrice = req.query.minPrice || 0;
+    const filterByMaxPrice = req.query.maxPrice || Infinity;
+    const filterByPrice = req.query.price;
+    const filter = {};
+    if (filterByName) {
+      filter.name = { $regex: filterByName, $options: 'i' }; //Case-sensitive and case-insensitive and word-searchable
+    }
+    if (filterByCategory) {
+      const categories = filterByCategory
+        .split(',')
+        .map(category => new RegExp(category, 'i')); //Case-sensitive and case-insensitive
+      filter.category = { $all: categories };
+    }
+    if (filterByMinPrice) {
+      filter.price = { ...filter.price, $gte: Number(filterByMinPrice) };
+    }
+    if (filterByMaxPrice) {
+      filter.price = { ...filter.price, $lte: Number(filterByMaxPrice) };
+    }
+    if (filterByPrice) {
+      filter.price = Number(filterByPrice);
+    }
 
-const [advertsList, total] = await Promise.all([
-  Advert.list(filter, skip, limit, sort, fields),
-  Advert.count(filter),
-]);
+    const [advertsList, total] = await Promise.all([
+      Advert.list(filter, skip, limit, sort, fields),
+      Advert.count(filter),
+    ]);
 
-const totalCountAds = await Advert.countAds(filter);
-console.log(`Total count of matching adverts: ${totalCountAds}`);
+    const totalCountAds = await Advert.countAds(filter);
+    console.log(`Total count of matching adverts: ${totalCountAds}`);
 
-res.json({ results: advertsList, totalCountAds });
-
-} catch (error) {
-next(error);
-}
+    res.json({ results: advertsList, totalCountAds });
+  } catch (error) {
+    next(error);
+  }
 });
 
 //

@@ -50,5 +50,13 @@ advertSchema.statics.updateAd = function (adId) {
 // Create & exports model
 const Advert = mongoose.model('Advert', advertSchema);
 
+// Configura la emisión de eventos de cambio
+const changeStream = Advert.watch();
+
+changeStream.on('change', change => {
+  console.log('Cambio detectado:', change);
+  // Emite eventos de cambio aquí
+});
+
 // Export model
 module.exports = Advert;

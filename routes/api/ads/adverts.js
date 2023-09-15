@@ -16,7 +16,7 @@ router.get('/', async (req, res, next) => {
   try {
     // Pagination
     const skip = parseInt(req.query.skip) || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit);
 
     let categories = {};
     categories = await Advert.find()

@@ -198,6 +198,11 @@ router.put(
       // Search for the ad by its ID and owner
       const advert = await Advert.findById(adId);
 
+      let imageUrl;
+
+      // I get the path of the old image if it exists
+      const oldImagePath = advert.image;
+
       if (!advert) {
         return res.status(404).json({ error: 'ad not found' });
       }
@@ -212,7 +217,8 @@ router.put(
       // Handle image update
       if (req.file) {
         const imageFilename = req.file.filename;
-        const imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+        imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
+
         updatedData.image = imageUrl;
       }
 
@@ -224,6 +230,29 @@ router.put(
 
       // Save the updated ad
       const updatedAd = await advert.save();
+
+      // If an old image exists and the new image is different
+      if (oldImagePath && oldImagePath !== imageUrl) {
+        // Delete the old image from the public folder
+        const oldImageFileName = oldImagePath.split('/').pop();
+
+        const oldImagePathOnDisk = path.join(
+          'public',
+          'images',
+          oldImageFileName,
+        );
+
+        fs.unlink(oldImagePathOnDisk, err => {
+          if (err) {
+            console.error('Error al eliminar la imagen antigua:', err);
+          } else {
+            console.log(
+              'Imagen antigua eliminada con éxito.',
+              oldImagePathOnDisk,
+            );
+          }
+        });
+      }
 
       res.json({ result: updatedAd });
     } catch (error) {

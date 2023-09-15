@@ -220,6 +220,29 @@ router.put(
         imageUrl = `${process.env.IMAGE_URL}${imageFilename}`;
 
         updatedData.image = imageUrl;
+
+        // If an old image exists and the new image is different
+        if (oldImagePath && oldImagePath !== imageUrl) {
+          // Delete the old image from the public folder
+          const oldImageFileName = oldImagePath.split('/').pop();
+
+          const oldImagePathOnDisk = path.join(
+            'public',
+            'images',
+            oldImageFileName,
+          );
+
+          fs.unlink(oldImagePathOnDisk, err => {
+            if (err) {
+              console.error('Error al eliminar la imagen antigua:', err);
+            } else {
+              console.log(
+                'Imagen antigua eliminada con éxito.',
+                oldImagePathOnDisk,
+              );
+            }
+          });
+        }
       }
 
       // Add the current date to the ad
@@ -230,29 +253,6 @@ router.put(
 
       // Save the updated ad
       const updatedAd = await advert.save();
-
-      // If an old image exists and the new image is different
-      if (oldImagePath && oldImagePath !== imageUrl) {
-        // Delete the old image from the public folder
-        const oldImageFileName = oldImagePath.split('/').pop();
-
-        const oldImagePathOnDisk = path.join(
-          'public',
-          'images',
-          oldImageFileName,
-        );
-
-        fs.unlink(oldImagePathOnDisk, err => {
-          if (err) {
-            console.error('Error al eliminar la imagen antigua:', err);
-          } else {
-            console.log(
-              'Imagen antigua eliminada con éxito.',
-              oldImagePathOnDisk,
-            );
-          }
-        });
-      }
 
       res.json({ result: updatedAd });
     } catch (error) {

@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const upload = require('../../../lib/uploadConfigure');
-const { User, Advert } = require('../../../models');
+const { User, Advert, Notifications } = require('../../../models');
 const {
   microEmailService,
   microEmailServiceBuy,
@@ -399,5 +399,16 @@ router.get(
     }
   },
 );
+
+router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const notifications = await Notifications.userNotification(userId);
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

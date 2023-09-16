@@ -259,24 +259,33 @@ router.put(
       io.to('anuncios').emit('priceActualizado', {
         userId: userId,
         advertId: adId,
-        nuevoPrecio: updatedAd.price,
+        newPrice: updatedAd.price,
+        status: updatedAd.status,
       });
 
       // Encuentra a los usuarios que tienen este anuncio en su lista de favoritos
       const usersWithFavorite = await User.find({ favorites: adId });
       console.log('favorites', usersWithFavorite);
+      console.log(
+        'favoritesid',
+        usersWithFavorite.map(user => user._id.toString()),
+      );
 
       // Ahora puedes enviar notificaciones a los usuarios correspondientes
       usersWithFavorite.forEach(async user => {
         const notificacionData = {
-          userId: userId, // ID del usuario al que se enviará la notificación
+          userId: usersWithFavorite.map(user => user._id.toString()), // ID del usuario al que se enviará la notificación
           advertId: adId,
-          message: updatedAd.price, // Mensaje de la notificación
+          message: updatedAd.price,
+          name: updatedAd.name,
+          status: updatedAd.status,
+          coin: updatedAd.coin, // Mensaje de la notificación
         };
+        console.log('idde la notifi', notificacionData.userId);
 
         // Crear una instancia de la notificación y guardarla en la base de datos
-        const nuevaNotificacion = new Notifications(notificacionData);
-        await nuevaNotificacion.save();
+        const newNotification = new Notifications(notificacionData);
+        await newNotification.save();
 
         // Luego puedes enviar la notificación a través de tu sistema de notificaciones
       });

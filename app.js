@@ -1,15 +1,43 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const http = require('http');
+const socketIo = require('socket.io');
 
 require('./lib/connectMongoose');
 
-var indexRouter = require('./routes/index');
-
-var app = express();
+const indexRouter = require('./routes/index');
+const app = express();
 const cors = require('cors');
+
+//Configure Socket.io to manejar conexiones del socket
+const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connection', socket => {
+  console.log('Un cliente se ha conectado');
+
+  // Escucha el evento para crear una sala de chat
+  socket.on('createRoom', ({ userId, recipientUsername }) => {
+    const roomName = `${userId}-${recipientUsername}`;
+
+    // Une al usuario y al destinatario a la sala
+    socket.join(roomName);
+
+    // Notifica a los clientes que la sala se ha creado
+    io.to(roomName).emit('roomCreated', roomName);
+
+    // Manejar eventos específicos
+  socket.on('chat message', (msg) => {
+    console.log(`Mensaje recibido: ${msg}`);
+    io.emit('chat message', msg); // Reenviar el mensaje a todos los clientes conectados
+  });
+
+  });
+
+  // ... (otros eventos)
+});
 
 // Configure CORS options to allow requests from localhost:3000
 const corsOptions = {
@@ -43,6 +71,7 @@ app.use('/api/auth/signup', require('./routes/api/auth/signup'));
 app.use('/api/auth/login', require('./routes/api/auth/login'));
 app.use('/api/users', require('./routes/api/users/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
+app.use('/api/chat', require('./routes/api/chat/chat'));  
 
 app.use((req, res, next) => {
   res.locals.session = req.session;

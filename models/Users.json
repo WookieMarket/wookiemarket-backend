@@ -5,15 +5,5 @@
     "username": "pepito",
     "resetpassword": "",
     "favorites": []
-  },
-  {
-    "_id": {
-      "$oid": "64f0aaa21fa5deb493e9540a"
-    },
-    "email": "fumanchu6999@gmail.com",
-    "username": "mando2",
-    "password": "$2b$07$cJnZlQDyywVejFfw.1f2xO2CkK4czJoCVUQ1kNXQB5jiO24lWgfnm",
-    "resetpassword": "",
-    "__v": 0
   }
 ]

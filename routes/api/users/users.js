@@ -10,6 +10,7 @@ const {
   resetPassword,
 } = require('../../../lib/microServiceEmailConfig');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
+const { ObjectId } = require('bson');
 
 /**
  *  GET /users
@@ -400,11 +401,15 @@ router.get(
   },
 );
 
+// FRONT
+// 1.- llamar a users/notifications y traerse el array de notificaciones asociadas al usuario logeado
+// 2.- dispatch del array para sobrescribir el array de notificaciones "locales" del state. De esta manera siempre tendremos todas las notificaciones actualizadas.
+// 3.- cuando el usuario pinche en una notificacion para marcarla como leída, llamara al endpoint /users/isread donde pondrá seteará el campo readAt
+
 router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const notifications = await Notifications.userNotification(userId);
-
+    const notifications = await User.getAllNotificationsById(userId);
     res.status(200).json(notifications);
   } catch (error) {
     next(error);
@@ -414,25 +419,35 @@ router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
 router.put('/isread', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const { notificationId } = req.body;
-    //const updatedData = req.body;
+    const _id = new ObjectId(notificationId);
+    const userId = req.user.id;
 
-    const notifications = await Notifications.oneNotification(notificationId);
-    console.log('notifi', notifications);
-    if (!notifications) {
+    const user = await User.userId(userId);
+
+    console.log('user', user, _id);
+
+    const userNotification = user.notifications.find(userNotification =>
+      userNotification._id.equals(_id),
+    );
+
+    console.log('userNotification', userNotification);
+
+    if (!userNotification) {
       return res.status(400).json({
         error: "I can't find the notification",
       });
     }
+
     // Marca la notificación como leída
-    notifications.isRead = true;
+    userNotification.readAt = Date.now();
 
     // Guarda la notificación actualizada en la base de datos
-    await notifications.save();
+    await user.save();
 
     // Envía una respuesta exitosa
     return res.status(200).json({
       message: 'Notification marked as read',
-      result: notifications,
+      result: userNotification,
     });
   } catch (error) {
     next(error);

@@ -5,6 +5,7 @@ const upload = require('../../../lib/uploadConfigure');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 const path = require('path');
 const fs = require('fs');
+const { ObjectId } = require('bson');
 
 /**
  *  Returns all ads
@@ -198,6 +199,7 @@ router.put(
 
       // Search for the ad by its ID and owner
       const advert = await Advert.findById(adId);
+      const advertCopyToCompare = JSON.parse(JSON.stringify(advert));
 
       let imageUrl;
 
@@ -255,38 +257,43 @@ router.put(
       // Save the updated ad
       const updatedAd = await advert.save();
 
-      // Broadcast event
-      io.to('anuncios').emit('priceActualizado', {
-        userId: userId,
-        advertId: adId,
-        newPrice: updatedAd.price,
-        status: updatedAd.status,
-      });
+      console.log('ads, despues, antes', updatedAd, advertCopyToCompare);
 
-      // Find users who have this ad in their favorites list
-      const usersWithFavorite = await User.find({ favorites: adId });
-      console.log('favorites', usersWithFavorite);
-      console.log(
-        'favoritesid',
-        usersWithFavorite.map(user => user._id.toString()),
-      );
-
-      // send notifications to the corresponding users
-      usersWithFavorite.forEach(async user => {
+      if (
+        updatedAd.price !== advertCopyToCompare.price ||
+        updatedAd.status !== advertCopyToCompare.status
+      ) {
         const notificacionData = {
-          userId: user._id.toString(),
-          advertId: adId,
-          message: updatedAd.price,
-          name: updatedAd.name,
-          status: updatedAd.status,
-          coin: updatedAd.coin,
+          // userId: user._id.toString(),
+          advert: new ObjectId(adId),
+          // message: updatedAd.price,
+          // name: updatedAd.name,
+          // status: updatedAd.status,
+          // coin: updatedAd.coin,
         };
-        console.log('idde la notifi', notificacionData.userId);
 
-        // Create an instance of the notification and save it to the database
         const newNotification = new Notifications(notificacionData);
+        // Create an instance of the notification and save it to the database
         await newNotification.save();
-      });
+
+        // Find users who have this ad in their favorites list
+        const usersWithFavorite = await User.find({ favorites: adId });
+        console.log('favorites', usersWithFavorite);
+        console.log(
+          'favoritesid',
+          usersWithFavorite.map(user => user._id.toString()),
+        );
+
+        // send notifications to the corresponding users
+        usersWithFavorite.forEach(async user => {
+          user.notifications.push({ notification: newNotification._id });
+          await user.save();
+          console.log('Notificacion añadida al usuario', user);
+        });
+      }
+
+      // Broadcast event - Esto serviría para poder actualizar los anuncios en realtime
+      // io.to('anuncios').emit('adUpdated', updatedAd);
 
       res.json({ result: updatedAd });
     } catch (error) {

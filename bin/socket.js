@@ -20,7 +20,7 @@ function initializeSocket(server) {
     console.log('Cliente conectado', socket.id);
 
     // Emitir un mensaje desde el servidor al cliente
-    socket.emit('mensajeDesdeServidor', '¡Hola desde el servidor!');
+    socket.emit('mensajeDesdeServidor', '¡Hi Mandalorian!');
 
     // Cuando un cliente se conecta, se une a una sala específica
     //socket.join('anuncios');

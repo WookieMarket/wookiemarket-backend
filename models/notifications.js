@@ -1,12 +1,8 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = mongoose.Schema({
-  userId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true }],
-  advertId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Advert',
-    index: true,
-  },
+  userId: { type: String, index: true },
+  advertId: { type: String, index: true },
   message: { type: String, index: true },
   name: { type: String, index: true },
   status: { type: String, index: true },
@@ -17,6 +13,11 @@ const notificationSchema = mongoose.Schema({
 
 notificationSchema.statics.userNotification = function (id) {
   const notifications = Notifications.find({ userId: id });
+  return notifications;
+};
+
+notificationSchema.statics.oneNotification = function (id) {
+  const notifications = Notifications.findById(id);
   return notifications;
 };
 

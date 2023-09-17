@@ -255,7 +255,7 @@ router.put(
       // Save the updated ad
       const updatedAd = await advert.save();
 
-      // Emitir evento de cambio en price
+      // Broadcast event
       io.to('anuncios').emit('priceActualizado', {
         userId: userId,
         advertId: adId,
@@ -263,7 +263,7 @@ router.put(
         status: updatedAd.status,
       });
 
-      // Encuentra a los usuarios que tienen este anuncio en su lista de favoritos
+      // Find users who have this ad in their favorites list
       const usersWithFavorite = await User.find({ favorites: adId });
       console.log('favorites', usersWithFavorite);
       console.log(
@@ -271,23 +271,21 @@ router.put(
         usersWithFavorite.map(user => user._id.toString()),
       );
 
-      // Ahora puedes enviar notificaciones a los usuarios correspondientes
+      // send notifications to the corresponding users
       usersWithFavorite.forEach(async user => {
         const notificacionData = {
-          userId: usersWithFavorite.map(user => user._id.toString()), // ID del usuario al que se enviará la notificación
+          userId: user._id.toString(),
           advertId: adId,
           message: updatedAd.price,
           name: updatedAd.name,
           status: updatedAd.status,
-          coin: updatedAd.coin, // Mensaje de la notificación
+          coin: updatedAd.coin,
         };
         console.log('idde la notifi', notificacionData.userId);
 
-        // Crear una instancia de la notificación y guardarla en la base de datos
+        // Create an instance of the notification and save it to the database
         const newNotification = new Notifications(notificacionData);
         await newNotification.save();
-
-        // Luego puedes enviar la notificación a través de tu sistema de notificaciones
       });
 
       res.json({ result: updatedAd });
@@ -318,7 +316,6 @@ router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const ad = await Advert.findById(id);
-    //console.log('anuncio eliminado', ad);
 
     const fileName = ad.image.split('/').pop();
     console.log('anuncio eliminado', fileName);
@@ -327,30 +324,28 @@ router.delete('/:id', async (req, res) => {
 
     await Advert.findByIdAndDelete(id);
 
-    // Elimina el archivo en la carpeta pública
+    // Delete the file in the public folder
     fs.unlink(imagePath, err => {
       if (err) {
-        console.error('Error al eliminar el archivo:', err);
+        console.error('Error deleting file:', err);
       } else {
-        console.log('Archivo eliminado con éxito:', imagePath);
+        console.log('Successfully deleted file:', imagePath);
       }
     });
 
-    // Obtener la lista de usuarios que tienen el anuncio en sus favoritos
+    // Get the list of users who have the ad in their favorites
     const usersToUpdate = await User.find({ favorites: ad._id });
-    console.log('usuario', usersToUpdate);
 
-    // Actualizar la lista de favoritos de cada usuario
+    // Update each user's favorites list
     usersToUpdate.forEach(async user => {
       const index = user.favorites.indexOf(ad._id);
       if (index !== -1) {
-        // Si se encuentra el ID del anuncio en la lista de favoritos del usuario, eliminarlo
+        // If the ad ID is found in the user's favorites list, delete it
         user.favorites.splice(index, 1);
-        // Guardar los cambios en la base de datos
+        // Save changes to the database
         await user.save();
       }
     });
-    //console.log('usuarioid borrado', usersToUpdate);
 
     // Sends a response to the client indicating that the advertisement was successfully removed.
     res.status(200).send({

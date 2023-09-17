@@ -411,4 +411,32 @@ router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   }
 });
 
+router.put('/isread', jwtAuthApiMiddleware, async (req, res, next) => {
+  try {
+    const { notificationId } = req.body;
+    //const updatedData = req.body;
+
+    const notifications = await Notifications.oneNotification(notificationId);
+    console.log('notifi', notifications);
+    if (!notifications) {
+      return res.status(400).json({
+        error: "I can't find the notification",
+      });
+    }
+    // Marca la notificación como leída
+    notifications.isRead = true;
+
+    // Guarda la notificación actualizada en la base de datos
+    await notifications.save();
+
+    // Envía una respuesta exitosa
+    return res.status(200).json({
+      message: 'Notification marked as read',
+      result: notifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

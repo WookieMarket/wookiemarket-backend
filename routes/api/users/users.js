@@ -10,6 +10,7 @@ const {
   resetPassword,
 } = require('../../../lib/microServiceEmailConfig');
 const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
+const { ObjectId } = require('bson');
 
 /**
  *  GET /users
@@ -403,8 +404,7 @@ router.get(
 router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const notifications = await Notifications.userNotification(userId);
-
+    const notifications = await User.getAllNotificationsById(userId);
     res.status(200).json(notifications);
   } catch (error) {
     next(error);
@@ -414,25 +414,34 @@ router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
 router.put('/isread', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const { notificationId } = req.body;
-    //const updatedData = req.body;
+    const _id = new ObjectId(notificationId);
+    const userId = req.user.id;
 
-    const notifications = await Notifications.oneNotification(notificationId);
-    console.log('notifi', notifications);
-    if (!notifications) {
+    const user = await User.userId(userId);
+
+    console.log('user', user, _id);
+
+    const userNotification = user.notifications.find(userNotification =>
+      userNotification._id.equals(_id),
+    );
+
+    console.log('userNotification', userNotification);
+
+    if (!userNotification) {
       return res.status(400).json({
         error: "I can't find the notification",
       });
     }
-    // Marca la notificación como leída
-    notifications.isRead = true;
 
-    // Guarda la notificación actualizada en la base de datos
-    await notifications.save();
+    // Mark the notification as read
+    userNotification.readAt = Date.now();
 
-    // Envía una respuesta exitosa
+    // Save the updated notification to the database
+    await user.save();
+
     return res.status(200).json({
       message: 'Notification marked as read',
-      result: notifications,
+      result: userNotification,
     });
   } catch (error) {
     next(error);

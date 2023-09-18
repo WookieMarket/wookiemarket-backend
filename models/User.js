@@ -9,6 +9,15 @@ const userSchema = mongoose.Schema({
   password: String,
   resetpassword: String,
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Advert' }],
+  notifications: [
+    {
+      notification: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Notifications',
+      },
+      readAt: { type: Date, default: undefined, required: false },
+    },
+  ],
 });
 
 userSchema.statics.usersAll = function () {
@@ -171,6 +180,26 @@ userSchema.statics.favoriteAds = async function (userId) {
 
     const favoriteAdIds = user.favorites;
     return favoriteAdIds;
+  } catch (error) {
+    throw error;
+  }
+};
+
+userSchema.statics.getAllNotificationsById = async function (userId) {
+  try {
+    // Find the user by their ID and get the array of favorite ad IDs
+    const user = await User.findById(userId).populate({
+      path: 'notifications.notification',
+      populate: {
+        path: 'advert',
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user.notifications.filter(x => !!x.notification);
   } catch (error) {
     throw error;
   }

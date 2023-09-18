@@ -5,5 +5,12 @@
     "username": "pepito",
     "resetpassword": "",
     "favorites": []
+  },
+  {
+    "email": "mando2@server.com",
+    "password": "superseguro",
+    "username": "mando2",
+    "resetpassword": "",
+    "favorites": []
   }
 ]

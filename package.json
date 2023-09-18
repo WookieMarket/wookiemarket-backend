@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "dev": "cross-env DEBUG=wookiemarket-backend:* PORT=3001 nodemon ./bin/www",
     "initDB": "node ./bin/initDB",
+    "printDB": "node ./bin/printDB",
     "test": "cross-env NODE_ENV=test jest --testTimeout=5000",
     "test:watch": "jest --watchAll",
     "test:unit": "jest unit",

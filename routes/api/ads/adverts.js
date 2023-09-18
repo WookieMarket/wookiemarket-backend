@@ -264,15 +264,13 @@ router.put(
         updatedAd.status !== advertCopyToCompare.status
       ) {
         const notificacionData = {
-          // userId: user._id.toString(),
           advert: new ObjectId(adId),
-          // message: updatedAd.price,
-          // name: updatedAd.name,
-          // status: updatedAd.status,
-          // coin: updatedAd.coin,
+          status: updatedAd.status,
+          price: updatedAd.price,
         };
 
         const newNotification = new Notifications(notificacionData);
+
         // Create an instance of the notification and save it to the database
         await newNotification.save();
 
@@ -291,9 +289,6 @@ router.put(
           console.log('Notificacion añadida al usuario', user);
         });
       }
-
-      // Broadcast event - Esto serviría para poder actualizar los anuncios en realtime
-      // io.to('anuncios').emit('adUpdated', updatedAd);
 
       res.json({ result: updatedAd });
     } catch (error) {

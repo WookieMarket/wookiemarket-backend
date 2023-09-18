@@ -401,11 +401,6 @@ router.get(
   },
 );
 
-// FRONT
-// 1.- llamar a users/notifications y traerse el array de notificaciones asociadas al usuario logeado
-// 2.- dispatch del array para sobrescribir el array de notificaciones "locales" del state. De esta manera siempre tendremos todas las notificaciones actualizadas.
-// 3.- cuando el usuario pinche en una notificacion para marcarla como leída, llamara al endpoint /users/isread donde pondrá seteará el campo readAt
-
 router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -438,13 +433,12 @@ router.put('/isread', jwtAuthApiMiddleware, async (req, res, next) => {
       });
     }
 
-    // Marca la notificación como leída
+    // Mark the notification as read
     userNotification.readAt = Date.now();
 
-    // Guarda la notificación actualizada en la base de datos
+    // Save the updated notification to the database
     await user.save();
 
-    // Envía una respuesta exitosa
     return res.status(200).json({
       message: 'Notification marked as read',
       result: userNotification,

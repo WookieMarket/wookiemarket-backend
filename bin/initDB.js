@@ -3,7 +3,7 @@
 // Import local variable values
 require('dotenv').config();
 
-const { Advert, User, Notifications } = require('../models');
+const { Advert, User } = require('../models');
 const connection = require('../lib/connectMongoose');
 
 main().catch(err => console.log('There was a error', err));
@@ -13,9 +13,8 @@ async function main() {
   await addUsers('./models/Users.json');
 
   // initialize Advert collection
-  await addAdverts('./models/Adverts.json');
-  // initialize Notifications collection
-  await initNotifications('./models/Notifications.json');
+  const adsSample = process.env.ADS_SAMPLES || 'Adverts.json';
+  await addAdverts(`./models/${adsSample}`);
 
   // close connection
   connection.close();
@@ -23,7 +22,6 @@ async function main() {
 
 /**
  * Loads user data and create Users instances
- *
  * @param {String} fileName string file name for the data set to be imported
  */
 async function addUsers(fileName) {
@@ -53,36 +51,19 @@ async function addUsers(fileName) {
 
 /**
  * Loads Advert data and create Adverts instances
- *
  * @param {String} fileName string file name for the data set to be imported
  */
 async function addAdverts(fileName) {
-  // Delete all documents in the advert collection
+  // Drops all adverts
   const deleted = await Advert.deleteMany();
   console.log(`Deleted ${deleted.deletedCount} adverts.`);
 
-  // Load advert
+  // Load ads
   const adsList = await loadDataFrom(fileName);
 
   try {
     const inserted = await Advert.create(adsList);
     console.log(`Importing adverts...'${inserted}`);
-  } catch (error) {
-    console.log('error', error);
-  }
-}
-
-async function initNotifications(fileName) {
-  // Elimina todas las notificaciones existentes
-  const deleted = await Notifications.deleteMany();
-  console.log(`Deleted ${deleted.deletedCount} notifications`);
-
-  // Load advert
-  const adsList = await loadDataFrom(fileName);
-
-  try {
-    const inserted = await Notifications.create(adsList);
-    console.log(`Importing notifications...'${inserted}`);
   } catch (error) {
     console.log('error', error);
   }
@@ -100,4 +81,4 @@ async function loadDataFrom(path) {
   return items;
 }
 
-module.exports = { addUsers, addAdverts, initNotifications };
+module.exports = { addUsers, addAdverts };

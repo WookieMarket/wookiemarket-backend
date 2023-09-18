@@ -1,0 +1,204 @@
+[
+    {
+        "name": "prueba correo",
+        "onSale": true,
+        "price": 122,
+        "image": "http://localhost:3001/images/image-1694707211631-B-Wing Starfighter.jpg",
+        "category": [
+            "Empire"
+        ],
+        "description": "mmmmm",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "prueba",
+        "onSale": true,
+        "price": 121,
+        "image": "http://localhost:3001/images/image-1694804917515-Death_Star.webp",
+        "category": [
+            "Mandalorians"
+        ],
+        "description": "lo quita ",
+        "status": "reserved",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "Deadth Star III",
+        "onSale": true,
+        "price": 85000000000,
+        "image": "http://localhost:3001/images/image-1693679580483-star-wars-dont-upset-the-wookiee-en.jpg",
+        "category": [
+            "Empire"
+        ],
+        "description": "Tercera Estrella de la muerte. Construída en secreto y en perfecto estado (aún no ha sido atacada). Longitud: 900 km. Envergadura: 900 km, altura: 900 Km. Armamento: Reflector parabólico de superrayo láser (1), Baterías turboláser (15.000), Baterías pesadas de turboláseres (15,000), Cañones (7.500), Cañones de iones (5.000), Rayo tractor generadores (768), >1200000 salas, 100000 hangares y mucho más. Sin amueblar, sin tropas ni personal. Sin vehículos ni naves. Se vende por cambio a una más grande. Regalo un ambientador de pino para el retrovisor",
+        "status": "true",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "Peluche Wookie",
+        "onSale": false,
+        "price": 20,
+        "image": "http://localhost:3001/images/image-1693679675794-casco_mandolariano.jpg",
+        "category": [
+            "Rebels"
+        ],
+        "description": "Peluche de un Wookie. Se supone que es Chewaka, pero no es tan grande como él. Se entrega limpio y acicalado. Vendo porque ya soy mayor y mi mamá dice que no puedo andar con estas cosas a mi edad.",
+        "status": "true",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "Casco Mandolariano",
+        "onSale": true,
+        "price": 300,
+        "image": "http://localhost:3001/images/image-1693679675794-casco_mandolariano.jpg",
+        "category": [
+            "Mandalorians"
+        ],
+        "description": "Por razones laborales necesito un casco mientras reparan el mío. Se ruega discreción. Sólo envíos. Ese es el camino.",
+        "status": "false",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "B-Wing Starfighter",
+        "onSale": true,
+        "price": 10,
+        "image": "http://localhost:3001/images/image-1693679580483-star-wars-dont-upset-the-wookiee-en.jpg",
+        "category": [
+            "Rebels"
+        ],
+        "description": "Busco maqueta de un B-Wing para entretenerme y rodar mis propias películas de Star Wars, pero con maquetas, como las de antes...También busco actores por si interesa.",
+        "status": "false",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "Alienigena amigable",
+        "onSale": false,
+        "price": 1000,
+        "image": "http://localhost:3001/images/alien.jpg",
+        "category": [
+            "lifestyle"
+        ],
+        "description": "Se necesita domesticado y que hable español",
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "Agujero negro",
+        "onSale": true,
+        "price": 2000,
+        "image": "http://localhost:3001/images/blackhole.jpg",
+        "category": [
+            "lifestyle",
+            "mobile"
+        ],
+        "description": "Le cabe mucho. Ideal como cartera de mujer.",
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "Capa invisible",
+        "onSale": true,
+        "price": 750,
+        "image": "http://localhost:3001/images/invisible-cape.jpg",
+        "category": [
+            "lifestyle",
+            "mobile",
+            "work"
+        ],
+        "description": "Perfecta para entrar a sitios sin pagar",
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "Ufo Retro",
+        "onSale": true,
+        "price": 2500,
+        "image": "http://localhost:3001/images/vintage-ovni.jpg",
+        "category": [
+            "lifestyle",
+            "mobile",
+            "motor"
+        ],
+        "description": "Perfecto para paseos con estilo en la ciudad",
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "Maquina del tiempo",
+        "onSale": false,
+        "price": 2000,
+        "image": "http://localhost:3001/images/time-machine.jpg",
+        "category": [
+            "mobile",
+            "motor"
+        ],
+        "description": "La busco para viajar al mejor tiempo de la historia",
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "Set de varitas magicas",
+        "onSale": false,
+        "price": 500,
+        "description": "La busco con urgencia para dar toques magicos",
+        "image": "http://localhost:3001/images/sorcerer-wand.jpg",
+        "category": [
+            "mobile",
+            "motor"
+        ],
+        "status": "false",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    },
+    {
+        "name": "peluche",
+        "onSale": false,
+        "price": 1500,
+        "image": "http://localhost:3001/images/image-1695051888782-star-wars-dont-upset-the-wookiee-en.jpg",
+        "category": [
+            "Rebels"
+        ],
+        "description": "Peluche de un Wookie. Se supone que es Chewaka, pero no es tan grande como él. Se entrega limpio y acicalado. Vendo porque ya soy mayor y mi mamá dice que no puedo andar con estas cosas a mi edad.",
+        "status": "available",
+        "coin": "€",
+        "username": "mando2",
+        "userId": "65086cf8dead6a19e3583478"
+    },
+    {
+        "name": "Luna roja",
+        "onSale": true,
+        "price": 2000,
+        "image": "http://localhost:3001/images/image-1695052038197-luna_roja.jpeg",
+        "category": [
+            "lifestyle"
+        ],
+        "description": "La busco para pasar el verano",
+        "status": "available",
+        "coin": "€",
+        "username": "pepito",
+        "userId": "65086cf8dead6a19e3583477"
+    }
+]

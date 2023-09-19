@@ -36,7 +36,6 @@ io.on('connection', socket => {
 
   });
 
-  // ... (otros eventos)
 });
 
 // Configure CORS options to allow requests from localhost:3000
@@ -71,7 +70,7 @@ app.use('/api/auth/signup', require('./routes/api/auth/signup'));
 app.use('/api/auth/login', require('./routes/api/auth/login'));
 app.use('/api/users', require('./routes/api/users/users'));
 app.use('/api/ads/adverts', require('./routes/api/ads/adverts'));
-app.use('/api/chat', require('./routes/api/chat/chat'));  
+app.use('/api/chatRoom', require('./routes/api/chatRoom/chatRoom'));  
 
 app.use((req, res, next) => {
   res.locals.session = req.session;

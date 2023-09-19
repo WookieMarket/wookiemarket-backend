@@ -1,4 +1,4 @@
-const iniciarChat = (req, res) => {
+const startChat = (req, res) => {
   const userId = req.params.userId;
   
   // Lógica para iniciar el chat
@@ -11,5 +11,5 @@ const iniciarChat = (req, res) => {
 };
 
 module.exports = {
-  iniciarChat,
+  startChat,
 };

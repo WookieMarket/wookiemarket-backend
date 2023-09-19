@@ -2,11 +2,6 @@ const express = require('express');
 const router = express.Router();
 const chatController = require('../../../controllers/chatController');
 
-// Ruta para iniciar chat
-/*router.post('/chat/:userId', chatController.startChat);
-
-module.exports = router;*/
-
 router.post('/:userId', (req, res) => {
   const userId = req.params.userId;
 

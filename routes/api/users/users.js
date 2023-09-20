@@ -66,13 +66,34 @@ router.get('/id/:id', async (req, res, next) => {
  */
 router.get('/:user/ads', async (req, res, next) => {
   try {
-    let user = req.params.user;
+    const user = req.params.user;
     if (!user) {
       return res.status(400).json({
         error: "Missing parameter 'user'",
       });
     }
     const filter = { username: user };
+    const ads = await Advert.list(filter);
+    res.json({ results: ads });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ *  GET /api/users/myads (query)
+ *  Search all ads of user
+ *  returns [Advert] list of ads
+ */
+router.get('/myads', jwtAuthApiMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(400).json({
+        error: "Missing parameter 'user'",
+      });
+    }
+    const filter = { userId: userId };
     const ads = await Advert.list(filter);
     res.json({ results: ads });
   } catch (error) {

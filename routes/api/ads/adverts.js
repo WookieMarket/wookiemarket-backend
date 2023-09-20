@@ -8,10 +8,8 @@ const fs = require('fs');
 const { ObjectId } = require('bson');
 
 /**
- *  Returns all ads
- *
- *  GET api/ads/adverts
- *  Returns all ads
+ *  GET /api/ads/adverts/ (query)
+ *  returns {[Adverts]} list of all ads, error otherwise
  */
 router.get('/', async (req, res, next) => {
   try {
@@ -31,10 +29,8 @@ router.get('/', async (req, res, next) => {
 });
 
 /**
- * Returns a list of unique categories
- *
  * GET api/ads/adverts/categories
- * Returns a list of unique categories
+ * returns {[String]} a list of unique categories
  */
 router.get('/categories', async (req, res, next) => {
   try {
@@ -53,10 +49,9 @@ router.get('/categories', async (req, res, next) => {
 });
 
 /**
- *  Returns a list of ads
- *
- *  GET api/ads/adverts/filter
- *  Returns a list of ads
+ *  GET api/ads/adverts/filter (query)
+ *  Fetch ads list according to filter provided parameters
+ *  returns {[Adverts]} a list of filtered ads
  */
 router.get('/filter', async (req, res, next) => {
   try {
@@ -109,12 +104,9 @@ router.get('/filter', async (req, res, next) => {
   }
 });
 
-//
 /**
- * Returns an advert by Id
- *
- *  GET api/ads/adverts/:id
- *  Returns an ad if found
+ *  GET api/ads/adverts/:id (params)
+ *  returns {Advert} an Advert or empty object if not found, error otherwise
  */
 router.get('/:id', async (req, res, next) => {
   try {
@@ -127,10 +119,9 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**
- *  Creates an ad
- *
  *  POST api/ads/adverts/create (body)
  *  Create an advert
+ *  returns {String} message ok otherwise error
  */
 router.post(
   '/create',
@@ -181,10 +172,9 @@ router.post(
 );
 
 /**
- *  modify an ad
- *
- *  PUT api/ads/adverts/update/id (body)
+ *  PUT api/ads/adverts/update/id (params|body)
  *  modify an ad if it belongs to the user
+ *  returns {Advert} updated ad, error otherwise
  */
 router.put(
   '/update/:id',
@@ -297,6 +287,11 @@ router.put(
   },
 );
 
+/**
+ * GET api/ads/adverts/find/:id (params)
+ * Retrieves an Ad by id
+ * returns {Advert} an Ad, or empty object, error otherwise
+ */
 router.get('/find/:id', async (req, res, next) => {
   try {
     const adId = req.params.id;
@@ -314,7 +309,12 @@ router.get('/find/:id', async (req, res, next) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+/**
+ * DELETE api/ads/adverts/:id (params)
+ * Cheks auth and drops an Ad if fount
+ * returns {Object} string message ok and Ad.Id of the deleted Ad, error otherwise
+ */
+router.delete('/:id', jwtAuthApiMiddleware, async (req, res) => {
   try {
     const id = req.params.id;
     const ad = await Advert.findById(id);

@@ -13,7 +13,7 @@ const jwtAuthApiMiddleware = require('../../../lib/jwtAuthApiMiddleware');
 const { ObjectId } = require('bson');
 
 /**
- *  GET /users
+ *  GET /api/users/
  *  returns all users
  */
 router.get('/', async (req, res, next) => {
@@ -28,8 +28,9 @@ router.get('/', async (req, res, next) => {
 });
 
 /**
- *  GET /users/email (body)
- *  returns the user searched for by email
+ *  GET /api/users/email (params)
+ *  searches a user by email
+ *  returns a {User}
  */
 router.get('/email/:email', async (req, res, next) => {
   try {
@@ -43,8 +44,9 @@ router.get('/email/:email', async (req, res, next) => {
 });
 
 /**
- *  GET /users/id/:id (params)
- *  returns the user searched for by id
+ *  GET /api/users/id/:id (params)
+ *  searches a user by id
+ *  returns a {User}
  */
 router.get('/id/:id', async (req, res, next) => {
   try {
@@ -58,12 +60,12 @@ router.get('/id/:id', async (req, res, next) => {
 });
 
 /**
- *  GET /users/:user/ads (params)
- *  returns list of ads for the given username
+ *  GET /api/users/:user/ads (params)
+ *  Search all ads of user
+ *  returns [Advert] list of ads
  */
 router.get('/:user/ads', async (req, res, next) => {
   try {
-    // console.log(req.params);
     let user = req.params.user;
     if (!user) {
       return res.status(400).json({
@@ -72,7 +74,6 @@ router.get('/:user/ads', async (req, res, next) => {
     }
     const filter = { username: user };
     const ads = await Advert.list(filter);
-    // console.log(ads);
     res.json({ results: ads });
   } catch (error) {
     next(error);
@@ -80,8 +81,9 @@ router.get('/:user/ads', async (req, res, next) => {
 });
 
 /**
- *  POST /users/email-password (body)
- *  returns an email with a url that has the resetpassword token and the user's email
+ *  POST /api/users/email-password (body)
+ *  Post a job to microserviceEmail to send a email with an embedded token url and user email to reset password
+ *  returns {String} message ok otherwise error
  */
 router.post('/email-password', async (req, res, next) => {
   const { to } = req.body;
@@ -98,8 +100,10 @@ router.post('/email-password', async (req, res, next) => {
 });
 
 /**
- *  POST /users/email-buy (body)
- *  Send an email to the owner of the ad with the message and in the body of the email the buyer's email
+ *  POST /api/users/email-buy (body)
+ *  Post a job to microserviceEmail to send an email
+ *  to the ad's owner with the message and the buyer's email
+ *  returns {String} message ok otherwise error
  */
 router.post('/email-buy', jwtAuthApiMiddleware, async (req, res, next) => {
   const { adOwnerId, custom_message } = req.body;
@@ -127,7 +131,7 @@ router.post('/email-buy', jwtAuthApiMiddleware, async (req, res, next) => {
     await microEmailServiceBuy(to, custom_message, userFrom);
 
     res.status(200).json({
-      message: 'Password recovery email sent successfully.',
+      message: 'Contact owner email sent successfully.',
     });
   } catch (error) {
     next(error);
@@ -135,7 +139,7 @@ router.post('/email-buy', jwtAuthApiMiddleware, async (req, res, next) => {
 });
 
 /**
- *  POST /users/recover-password (body)
+ *  POST /api/users/recover-password (body)
  *  if the url token and the token inside resetpassword match, the password is changed
  *  returns {} object message otherwise error
  */
@@ -174,8 +178,9 @@ router.post('/recover-password', async (req, res, next) => {
 });
 
 /**
- *  POST /users/deleted-user (body)
- *  asks for the email locates the user takes out his id and deletes it
+ *  POST /api/users/deleted-user (body)
+ *  Finds user by provided email, check auth, and drops the user from database
+ *  returns {} object ok message, otherwise error
  */
 router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res, next) => {
   const { email } = req.body;
@@ -235,60 +240,64 @@ router.post('/deleted-user', jwtAuthApiMiddleware, async (req, res, next) => {
 });
 
 /**
- * POST /users/user-info (body| query)
+ * POST /api/users/user-info (body| query)
  * updates user information
- *
- * returns updated user object or error
+ * returns {User} updated user, otherwise error
  */
-router.post('/user-info', upload.none(), async (req, res, next) => {
-  let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
-  token = token.replace('Bearer ', '');
+router.post(
+  '/user-info',
+  jwtAuthApiMiddleware,
+  upload.none(),
+  async (req, res, next) => {
+    let token = req.get('Authorization' || req.body.jwt || req.query.jwt);
+    token = token.replace('Bearer ', '');
 
-  const data = req.body;
-  console.log('data:', data);
+    const data = req.body;
+    console.log('data:', data);
 
-  try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken._id;
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decodedToken._id;
 
-    // Get the current user
-    const user = await User.findById(userId);
+      // Get the current user
+      const user = await User.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Check if the current password was provided and if it is correct
-    if (data.password) {
-      const passwordMatch = await user.comparePassword(data.password);
-      if (!passwordMatch) {
-        return res.status(400).json({ error: 'Incorrect password' });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
       }
+
+      // Check if the current password was provided and if it is correct
+      if (data.password) {
+        const passwordMatch = await user.comparePassword(data.password);
+        if (!passwordMatch) {
+          return res.status(400).json({ error: 'Incorrect password' });
+        }
+      }
+
+      // Update user data
+      // If a new password is provided, encrypt it
+      if (data.newPassword) {
+        const hashedPassword = await User.hashPassword(data.newPassword);
+        user.password = hashedPassword;
+      }
+
+      user.email = data.email;
+      user.username = data.username;
+
+      // Save the updated user to the database
+      await user.save();
+
+      return res.status(200).json(user);
+    } catch (error) {
+      next(error);
     }
-
-    // Update user data
-    // If a new password is provided, encrypt it
-    if (data.newPassword) {
-      const hashedPassword = await User.hashPassword(data.newPassword);
-      user.password = hashedPassword;
-    }
-
-    user.email = data.email;
-    user.username = data.username;
-
-    // Save the updated user to the database
-    await user.save();
-
-    return res.status(200).json(user);
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 /**
- *  POST /favorites/:adId (params)
+ *  POST /api/users/favorites/:adId (params)
  *  Ads a given ad into the current user favorite list
- *
+ *  returns {Advert} added ad and message ok, otherwise error
  */
 router.post(
   '/favorites/:adId',
@@ -335,8 +344,9 @@ router.post(
 );
 
 /**
- *  DELETE /delete-favorite/adId
- *  return it searches for the user by his id and if it finds it, it deletes the id of the ad saved in the favorites property
+ *  DELETE /api/users/delete-favorite/adId (params)
+ *  Retrieve the user and remove Ad id from user's favorite list
+ *  returns {String} message ok, otherwise error
  */
 router.delete(
   '/delete-favorite/:adId',
@@ -383,8 +393,9 @@ router.delete(
 );
 
 /**
- *  GET /favorite-adverts
- *  returns all the ads that this user has saved
+ *  GET /api/users/favorite-adverts
+ *  Retrieves the list of favorite ad's ids of teh user
+ *  returns {[Advert.Id]} the ad's ids, error otherwise
  */
 router.get(
   '/favorite-adverts',
@@ -401,6 +412,11 @@ router.get(
   },
 );
 
+/**
+ * GET /api/users/notification
+ * Retrieves all notification for the provided user id
+ * returns {[Notifications]} the list of notifications, error otherwise
+ */
 router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -411,6 +427,11 @@ router.get('/notification', jwtAuthApiMiddleware, async (req, res, next) => {
   }
 });
 
+/**
+ * PUT /api/users/isread
+ * Sets a notifcation as read
+ * returns {String} message ok, otherwise error
+ */
 router.put('/isread', jwtAuthApiMiddleware, async (req, res, next) => {
   try {
     const { notificationId } = req.body;

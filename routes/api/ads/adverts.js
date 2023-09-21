@@ -119,6 +119,27 @@ router.get('/:id', async (req, res, next) => {
 });
 
 /**
+ *  GET api/ads/adverts/user/:user (params)
+ *  Search all ads of user
+ *  returns [Advert] list of ads
+ */
+router.get('/user/:user', async (req, res, next) => {
+  try {
+    const user = req.params.user;
+    if (!user) {
+      return res.status(400).json({
+        error: "Missing parameter 'user'",
+      });
+    }
+    const filter = { username: user };
+    const ads = await Advert.list(filter);
+    res.json({ results: ads });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  *  POST api/ads/adverts/create (body)
  *  Create an advert
  *  returns {String} message ok otherwise error
